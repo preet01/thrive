@@ -1,0 +1,1353 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Thrive</title>
+<link href="https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,500;1,400;1,500&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #f7f5f0;
+    --white: #ffffff;
+    --ink: #1c1c1a;
+    --ink2: #5a5a54;
+    --ink3: #a8a89a;
+    --ink4: #dddcd7;
+    --accent: #2d6a4f;
+    --accent-l: #e8f3ed;
+    --shadow: 0 2px 20px rgba(0,0,0,0.07);
+    --radius: 16px;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+
+  html { height: 100%; }
+
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--bg);
+    color: var(--ink);
+    max-width: 430px;
+    margin: 0 auto;
+    height: 100%;
+    overflow: hidden;
+    position: relative;
+  }
+
+  /* ── APP SHELL ─────────────────────── */
+  .app {
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+    height: 100dvh;
+    overflow: hidden;
+    position: relative;
+  }
+
+  /* ── PAGES ─────────────────────────── */
+  .page {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    opacity: 0;
+    pointer-events: none;
+    transform: translateY(12px);
+    transition: opacity 0.28s ease, transform 0.28s ease;
+    overflow: hidden;
+  }
+
+  .page.active {
+    opacity: 1;
+    pointer-events: all;
+    transform: translateY(0);
+  }
+
+  /* ── BOTTOM NAV ────────────────────── */
+  .bottom-nav {
+    position: fixed;
+    bottom: 0; left: 50%; 
+    transform: translateX(-50%);
+    width: 100%;
+    max-width: 430px;
+    background: rgba(247,245,240,0.96);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border-top: 1px solid var(--ink4);
+    display: flex;
+    padding: 10px 0 max(16px, env(safe-area-inset-bottom));
+    z-index: 200;
+  }
+
+  .nav-btn {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 4px 0;
+    transition: all 0.2s;
+  }
+
+  .nav-btn .nav-icon { font-size: 20px; line-height: 1; transition: transform 0.2s; }
+  .nav-btn .nav-label { font-size: 9px; letter-spacing: 1px; text-transform: uppercase; color: var(--ink4); transition: color 0.2s; font-weight: 500; }
+  .nav-btn.active .nav-label { color: var(--ink); }
+  .nav-btn.active .nav-icon { transform: scale(1.1); }
+
+  /* ══════════════════════════════════════
+     PAGE 1 — TODAY
+  ══════════════════════════════════════ */
+  #page-today { background: var(--bg); }
+
+  .hero-wrap {
+    position: relative;
+    height: 260px;
+    flex-shrink: 0;
+    overflow: hidden;
+  }
+
+  .hero-img {
+    width: 100%; height: 100%;
+    object-fit: cover;
+    display: block;
+    transition: opacity 0.6s ease;
+  }
+
+  .hero-img.loading { opacity: 0; }
+
+  /* CSS fallback scene (shown while image loads) */
+  .hero-fallback {
+    position: absolute;
+    inset: 0;
+    transition: opacity 0.4s ease;
+  }
+
+  .hero-fallback.nature {
+    background: linear-gradient(180deg, #b8dde8 0%, #c8e4d0 40%, #8aad7a 70%, #3a6248 100%);
+  }
+  .hero-fallback.arts {
+    background: linear-gradient(180deg, #e8d8c8 0%, #d4b898 40%, #c09878 70%, #8a6848 100%);
+  }
+  .hero-fallback.food {
+    background: linear-gradient(180deg, #f0e0c8 0%, #e8c89a 40%, #d4a870 70%, #b88848 100%);
+  }
+  .hero-fallback.fitness {
+    background: linear-gradient(180deg, #c8d8e8 0%, #a8c0d0 40%, #7898b0 70%, #486880 100%);
+  }
+  .hero-fallback.social {
+    background: linear-gradient(180deg, #e8e0d8 0%, #d8c8b8 40%, #c0a890 70%, #a08870 100%);
+  }
+  .hero-fallback.wellness {
+    background: linear-gradient(180deg, #c8e0e8 0%, #a8c8d8 40%, #88b0c0 70%, #608090 100%);
+  }
+
+  .hero-overlay {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(
+      to bottom,
+      rgba(247,245,240,0) 0%,
+      rgba(247,245,240,0) 45%,
+      rgba(247,245,240,0.5) 68%,
+      rgba(247,245,240,1) 100%
+    );
+  }
+
+  .hero-top-bar {
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 48px 20px 12px;
+    z-index: 5;
+  }
+
+  .hero-logo {
+    font-family: 'Lora', serif;
+    font-style: italic;
+    font-size: 22px;
+    color: rgba(255,255,255,0.95);
+    text-shadow: 0 1px 12px rgba(0,0,0,0.25);
+    letter-spacing: -0.3px;
+  }
+
+  .hero-date {
+    font-size: 11px;
+    color: rgba(255,255,255,0.75);
+    text-shadow: 0 1px 6px rgba(0,0,0,0.3);
+    letter-spacing: 0.5px;
+  }
+
+  /* Today body */
+  .today-body {
+    flex: 1;
+    overflow-y: auto;
+    padding: 12px 20px 100px;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .challenge-tag {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 9px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 8px;
+    font-weight: 500;
+  }
+
+  .tag-dot {
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    background: var(--accent);
+    flex-shrink: 0;
+  }
+
+  .challenge-title {
+    font-family: 'Lora', serif;
+    font-size: 22px;
+    font-style: italic;
+    font-weight: 400;
+    color: var(--ink);
+    line-height: 1.35;
+    margin-bottom: 8px;
+  }
+
+  .challenge-desc {
+    font-size: 13px;
+    color: var(--ink3);
+    line-height: 1.65;
+    margin-bottom: 20px;
+    font-weight: 300;
+  }
+
+  .challenge-actions {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 28px;
+  }
+
+  .btn-done {
+    flex: 1;
+    background: var(--ink);
+    color: var(--bg);
+    border: none;
+    border-radius: 14px;
+    padding: 14px 20px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.18s;
+    letter-spacing: 0.2px;
+  }
+
+  .btn-done:active { transform: scale(0.97); opacity: 0.85; }
+  .btn-done.completed { background: var(--accent); }
+
+  .btn-skip {
+    width: 50px;
+    background: var(--white);
+    border: 1px solid var(--ink4);
+    border-radius: 14px;
+    font-size: 17px;
+    cursor: pointer;
+    transition: all 0.18s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+  }
+
+  .btn-skip:active { transform: scale(0.95); }
+
+  .divider {
+    border: none;
+    border-top: 1px solid var(--ink4);
+    margin-bottom: 18px;
+  }
+
+  .section-label {
+    font-size: 9px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--ink4);
+    margin-bottom: 12px;
+    font-weight: 500;
+  }
+
+  /* Quick list pills on Today */
+  .list-pills {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+
+  .list-pill {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    background: var(--white);
+    border: 1px solid var(--ink4);
+    border-radius: 20px;
+    padding: 7px 13px;
+    font-size: 12px;
+    color: var(--ink2);
+    cursor: pointer;
+    transition: all 0.18s;
+  }
+
+  .list-pill:active { background: var(--ink4); }
+
+  .pill-dot {
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
+
+  .empty-pills {
+    font-size: 13px;
+    color: var(--ink3);
+    font-style: italic;
+    font-weight: 300;
+  }
+
+  /* ══════════════════════════════════════
+     PAGE 2 — MY LIST
+  ══════════════════════════════════════ */
+  #page-list { background: var(--bg); }
+
+  .list-header {
+    padding: 52px 20px 16px;
+    border-bottom: 1px solid var(--ink4);
+    flex-shrink: 0;
+    background: var(--bg);
+  }
+
+  .list-header-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    margin-bottom: 14px;
+  }
+
+  .list-header-top h2 {
+    font-family: 'Lora', serif;
+    font-size: 22px;
+    font-style: italic;
+    font-weight: 400;
+    color: var(--ink);
+  }
+
+  .item-count {
+    font-size: 12px;
+    color: var(--ink3);
+    background: var(--white);
+    border: 1px solid var(--ink4);
+    padding: 3px 10px;
+    border-radius: 20px;
+  }
+
+  /* Add bar */
+  .add-bar {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    background: var(--white);
+    border: 1px solid var(--ink4);
+    border-radius: 14px;
+    padding: 10px 12px;
+    box-shadow: var(--shadow);
+  }
+
+  .add-input {
+    flex: 1;
+    background: none;
+    border: none;
+    outline: none;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 14px;
+    color: var(--ink);
+    font-weight: 300;
+  }
+
+  .add-input::placeholder { color: var(--ink4); }
+
+  .add-input-btn {
+    background: var(--ink);
+    color: var(--bg);
+    border: none;
+    border-radius: 10px;
+    padding: 7px 14px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 12px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.18s;
+    white-space: nowrap;
+    flex-shrink: 0;
+  }
+
+  .add-input-btn:active { transform: scale(0.96); }
+
+  /* Category picker */
+  .cat-picker {
+    display: flex;
+    gap: 6px;
+    flex-wrap: wrap;
+    padding: 12px 20px;
+    background: var(--bg);
+    border-bottom: 1px solid var(--ink4);
+    flex-shrink: 0;
+  }
+
+  .cat-chip {
+    padding: 5px 12px;
+    border-radius: 20px;
+    border: 1px solid var(--ink4);
+    background: var(--white);
+    font-size: 11px;
+    color: var(--ink2);
+    cursor: pointer;
+    transition: all 0.18s;
+    font-family: 'DM Sans', sans-serif;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+  }
+
+  .cat-chip.selected {
+    background: var(--ink);
+    color: var(--bg);
+    border-color: var(--ink);
+  }
+
+  /* List */
+  .list-scroll {
+    flex: 1;
+    overflow-y: auto;
+    padding: 14px 20px 100px;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .list-section-label {
+    font-size: 9px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--ink4);
+    margin-bottom: 10px;
+    font-weight: 500;
+  }
+
+  .bucket-item {
+    display: flex;
+    align-items: center;
+    gap: 13px;
+    background: var(--white);
+    border-radius: var(--radius);
+    padding: 12px 14px;
+    margin-bottom: 8px;
+    box-shadow: var(--shadow);
+    cursor: pointer;
+    transition: all 0.2s;
+    animation: slideIn 0.25s ease;
+  }
+
+  @keyframes slideIn {
+    from { opacity: 0; transform: translateY(-8px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .bucket-item:active { transform: scale(0.98); }
+  .bucket-item.done { opacity: 0.4; box-shadow: none; }
+  .bucket-item.done .item-title { text-decoration: line-through; }
+
+  .item-img-wrap {
+    width: 46px; height: 46px;
+    border-radius: 12px;
+    overflow: hidden;
+    flex-shrink: 0;
+    background: var(--ink4);
+    position: relative;
+  }
+
+  .item-img {
+    width: 100%; height: 100%;
+    object-fit: cover;
+    display: block;
+    transition: opacity 0.4s;
+  }
+
+  .item-img.loading { opacity: 0; }
+
+  .item-img-fallback {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 20px;
+  }
+
+  .item-info { flex: 1; overflow: hidden; }
+
+  .item-title {
+    font-size: 14px;
+    font-weight: 400;
+    color: var(--ink);
+    margin-bottom: 4px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .item-meta {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 11px;
+    color: var(--ink3);
+  }
+
+  .item-cat-dot {
+    width: 5px; height: 5px;
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
+
+  .item-check {
+    width: 24px; height: 24px;
+    border-radius: 50%;
+    border: 1.5px solid var(--ink4);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    font-size: 11px;
+    color: transparent;
+    transition: all 0.2s;
+    flex-shrink: 0;
+  }
+
+  .bucket-item.done .item-check {
+    background: var(--accent);
+    border-color: var(--accent);
+    color: white;
+  }
+
+  .empty-list {
+    text-align: center;
+    padding: 60px 20px;
+    color: var(--ink3);
+  }
+
+  .empty-list .empty-icon { font-size: 40px; margin-bottom: 14px; }
+  .empty-list p { font-size: 14px; line-height: 1.6; font-weight: 300; font-style: italic; font-family: 'Lora', serif; }
+
+  /* ══════════════════════════════════════
+     REFLECTION MODAL
+  ══════════════════════════════════════ */
+  .modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(28,28,26,0);
+    z-index: 500;
+    display: flex;
+    align-items: flex-end;
+    justify-content: center;
+    pointer-events: none;
+    transition: background 0.3s ease;
+  }
+
+  .modal-overlay.open {
+    background: rgba(28,28,26,0.48);
+    pointer-events: all;
+  }
+
+  .modal-sheet {
+    width: 100%;
+    max-width: 430px;
+    background: var(--white);
+    border-radius: 26px 26px 0 0;
+    padding: 0 22px max(28px, env(safe-area-inset-bottom));
+    box-shadow: 0 -8px 48px rgba(0,0,0,0.18);
+    transform: translateY(100%);
+    transition: transform 0.35s cubic-bezier(0.32, 0.72, 0, 1);
+    will-change: transform;
+  }
+
+  .modal-overlay.open .modal-sheet {
+    transform: translateY(0);
+  }
+
+  .modal-handle {
+    width: 36px; height: 4px;
+    background: var(--ink4);
+    border-radius: 2px;
+    margin: 14px auto 22px;
+  }
+
+  .modal-item-preview {
+    display: flex;
+    align-items: center;
+    gap: 13px;
+    background: var(--bg);
+    border-radius: 14px;
+    padding: 12px 14px;
+    margin-bottom: 22px;
+  }
+
+  .modal-item-img {
+    width: 44px; height: 44px;
+    border-radius: 11px;
+    overflow: hidden;
+    flex-shrink: 0;
+    background: var(--ink4);
+    position: relative;
+  }
+
+  .modal-item-img img {
+    width: 100%; height: 100%;
+    object-fit: cover;
+    display: block;
+  }
+
+  .modal-item-img .fallback-emoji {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 20px;
+  }
+
+  .modal-item-title { font-size: 15px; font-weight: 400; color: var(--ink); margin-bottom: 3px; }
+  .modal-item-cat {
+    display: flex; align-items: center; gap: 5px;
+    font-size: 11px; color: var(--ink3);
+  }
+
+  .modal-q {
+    font-family: 'Lora', serif;
+    font-size: 18px;
+    font-style: italic;
+    font-weight: 400;
+    color: var(--ink);
+    margin-bottom: 4px;
+  }
+
+  .modal-sub {
+    font-size: 12px;
+    color: var(--ink3);
+    margin-bottom: 18px;
+    font-weight: 300;
+  }
+
+  .star-row {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 18px;
+  }
+
+  .star-btn {
+    font-size: 32px;
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: var(--ink4);
+    transition: all 0.15s;
+    padding: 0;
+    line-height: 1;
+  }
+
+  .star-btn.lit { color: #e8b84b; }
+  .star-btn:active { transform: scale(1.25); }
+
+  .note-area {
+    width: 100%;
+    background: var(--bg);
+    border: 1px solid var(--ink4);
+    border-radius: 14px;
+    padding: 13px 14px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 13px;
+    color: var(--ink);
+    resize: none;
+    height: 80px;
+    outline: none;
+    margin-bottom: 16px;
+    font-weight: 300;
+    line-height: 1.6;
+    transition: border-color 0.2s;
+  }
+
+  .note-area::placeholder { color: var(--ink4); font-style: italic; }
+  .note-area:focus { border-color: var(--ink3); }
+
+  .modal-actions { display: flex; gap: 10px; }
+
+  .btn-save {
+    flex: 1;
+    background: var(--ink);
+    color: var(--bg);
+    border: none;
+    border-radius: 14px;
+    padding: 14px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.18s;
+    letter-spacing: 0.2px;
+  }
+
+  .btn-save:active { transform: scale(0.97); }
+
+  .btn-modal-skip {
+    background: var(--bg);
+    color: var(--ink3);
+    border: 1px solid var(--ink4);
+    border-radius: 14px;
+    padding: 14px 18px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 14px;
+    cursor: pointer;
+    transition: all 0.18s;
+  }
+
+  /* ── TOAST ─────────────────────────── */
+  .toast {
+    position: fixed;
+    top: 60px;
+    left: 50%;
+    transform: translateX(-50%) translateY(-20px);
+    background: var(--ink);
+    color: var(--bg);
+    padding: 10px 20px;
+    border-radius: 20px;
+    font-size: 13px;
+    font-weight: 400;
+    z-index: 1000;
+    opacity: 0;
+    transition: all 0.25s ease;
+    white-space: nowrap;
+    pointer-events: none;
+  }
+
+  .toast.show {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+  }
+
+  /* ── LOADING SHIMMER ───────────────── */
+  @keyframes shimmer {
+    0% { background-position: -400px 0; }
+    100% { background-position: 400px 0; }
+  }
+
+  .shimmer {
+    background: linear-gradient(90deg, #f0eee8 25%, #e8e6e0 50%, #f0eee8 75%);
+    background-size: 400px 100%;
+    animation: shimmer 1.4s infinite;
+  }
+
+  /* ── SCROLLBAR HIDE ────────────────── */
+  .today-body::-webkit-scrollbar,
+  .list-scroll::-webkit-scrollbar { display: none; }
+  .today-body, .list-scroll { -ms-overflow-style: none; scrollbar-width: none; }
+</style>
+</head>
+<body>
+
+<div class="app">
+
+  <!-- ══════════════════════════════════
+       PAGE: TODAY
+  ══════════════════════════════════ -->
+  <div class="page active" id="page-today">
+
+    <div class="hero-wrap" id="heroWrap">
+      <div class="hero-fallback nature" id="heroFallback"></div>
+      <img class="hero-img loading" id="heroImg" alt="Challenge scene" />
+      <div class="hero-overlay"></div>
+      <div class="hero-top-bar">
+        <div class="hero-logo">Thrive</div>
+        <div class="hero-date" id="heroDate"></div>
+      </div>
+    </div>
+
+    <div class="today-body">
+      <div class="challenge-tag">
+        <div class="tag-dot" id="challengeTagDot"></div>
+        <span id="challengeTagLabel">Daily Challenge</span>
+      </div>
+
+      <div class="challenge-title" id="challengeTitle">Loading today's challenge…</div>
+      <div class="challenge-desc" id="challengeDesc"></div>
+
+      <div class="challenge-actions">
+        <button class="btn-done" id="btnDone" onclick="handleChallengeComplete()">I did this ✓</button>
+        <button class="btn-skip" id="btnSkip" onclick="skipChallenge()" title="Try a different challenge">↻</button>
+      </div>
+
+      <hr class="divider">
+      <div class="section-label">On your list</div>
+      <div class="list-pills" id="todayPills"></div>
+    </div>
+
+  </div>
+
+  <!-- ══════════════════════════════════
+       PAGE: MY LIST
+  ══════════════════════════════════ -->
+  <div class="page" id="page-list">
+
+    <div class="list-header">
+      <div class="list-header-top">
+        <h2>My List</h2>
+        <div class="item-count" id="itemCount">0 to try</div>
+      </div>
+      <div class="add-bar">
+        <input
+          class="add-input"
+          id="addInput"
+          type="text"
+          placeholder="Add something to try…"
+          maxlength="80"
+          onkeydown="if(event.key==='Enter') addItem()"
+        />
+        <button class="add-input-btn" onclick="addItem()">Add</button>
+      </div>
+    </div>
+
+    <!-- Category picker -->
+    <div class="cat-picker" id="catPicker"></div>
+
+    <div class="list-scroll" id="listScroll">
+      <div class="empty-list" id="emptyList">
+        <div class="empty-icon">🗺️</div>
+        <p>Your list is empty.<br>Add the first thing you want to try.</p>
+      </div>
+      <div id="listItems"></div>
+    </div>
+
+  </div>
+
+</div>
+
+<!-- ══════════════════════════════════
+     BOTTOM NAV
+══════════════════════════════════ -->
+<nav class="bottom-nav">
+  <button class="nav-btn active" id="nav-today" onclick="showPage('today')">
+    <span class="nav-icon">◎</span>
+    <span class="nav-label">Today</span>
+  </button>
+  <button class="nav-btn" id="nav-list" onclick="showPage('list')">
+    <span class="nav-icon">≡</span>
+    <span class="nav-label">My List</span>
+  </button>
+</nav>
+
+<!-- ══════════════════════════════════
+     REFLECTION MODAL
+══════════════════════════════════ -->
+<div class="modal-overlay" id="modalOverlay" onclick="handleOverlayClick(event)">
+  <div class="modal-sheet" id="modalSheet">
+    <div class="modal-handle"></div>
+
+    <div class="modal-item-preview">
+      <div class="modal-item-img" id="modalItemImg">
+        <div class="fallback-emoji" id="modalFallbackEmoji"></div>
+        <img id="modalImg" style="display:none;width:100%;height:100%;object-fit:cover" alt="">
+      </div>
+      <div>
+        <div class="modal-item-title" id="modalTitle"></div>
+        <div class="modal-item-cat">
+          <div class="item-cat-dot" id="modalCatDot"></div>
+          <span id="modalCatLabel"></span>
+        </div>
+      </div>
+    </div>
+
+    <div class="modal-q">How was it?</div>
+    <div class="modal-sub">Be honest — this is just for you.</div>
+
+    <div class="star-row" id="starRow">
+      <button class="star-btn" data-v="1" onclick="setStar(1)">★</button>
+      <button class="star-btn" data-v="2" onclick="setStar(2)">★</button>
+      <button class="star-btn" data-v="3" onclick="setStar(3)">★</button>
+      <button class="star-btn" data-v="4" onclick="setStar(4)">★</button>
+      <button class="star-btn" data-v="5" onclick="setStar(5)">★</button>
+    </div>
+
+    <textarea
+      class="note-area"
+      id="noteArea"
+      placeholder="What did you discover? How did it feel…"
+    ></textarea>
+
+    <div class="modal-actions">
+      <button class="btn-save" onclick="saveReflection()">Save reflection</button>
+      <button class="btn-modal-skip" onclick="skipReflection()">Skip</button>
+    </div>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div class="toast" id="toast"></div>
+
+<script>
+// ═══════════════════════════════════════════════
+// CONFIG
+// ═══════════════════════════════════════════════
+const UNSPLASH_KEY = '6TS9FphLnaJGEhcHqdDbG7WvQ55RbNKIEunJ8x4-xhQ';
+
+const CATEGORIES = [
+  { id: 'nature',   label: 'Nature',   emoji: '🌿', color: '#7da87d', query: 'forest nature morning light path' },
+  { id: 'arts',     label: 'Arts',     emoji: '🎨', color: '#c97070', query: 'pottery clay art studio creative' },
+  { id: 'food',     label: 'Food',     emoji: '🍜', color: '#d4956a', query: 'food market cooking fresh ingredients' },
+  { id: 'fitness',  label: 'Fitness',  emoji: '🏃', color: '#7db8a4', query: 'rock climbing hiking adventure movement' },
+  { id: 'social',   label: 'Social',   emoji: '🤝', color: '#9b8fc4', query: 'people community cafe gathering friends' },
+  { id: 'wellness', label: 'Wellness', emoji: '🧘', color: '#e8c87d', query: 'calm ocean sunrise wellness meditation' },
+];
+
+const CHALLENGES = [
+  { title: 'Sit in nature for 20 quiet minutes', desc: 'No music, no podcast. Just you, your senses, and whatever is living around you. Notice what you hear first.', cat: 'nature' },
+  { title: 'Cook a cuisine you have never tried before', desc: 'Pick a country. Find one traditional recipe. Buy the ingredients today. The process matters more than perfection.', cat: 'food' },
+  { title: 'Go somewhere completely unfamiliar', desc: 'A neighbourhood, a road, a building you always pass but never enter. Let curiosity lead for at least 30 minutes.', cat: 'nature' },
+  { title: 'Create something with your hands today', desc: 'Sketch, sculpt, bake, build — make something physical that did not exist this morning. It does not need to be good.', cat: 'arts' },
+  { title: 'Have one genuinely deep conversation', desc: 'Ask someone what has really been on their mind lately. Then actually listen. No advice needed — just presence.', cat: 'social' },
+  { title: 'Move your body in a way that feels like play', desc: 'Not exercise. Play. Sprint, climb something, dance alone in your kitchen. Move like you did as a child would.', cat: 'fitness' },
+  { title: 'Spend one hour completely phone-free', desc: 'From right now. No checking, no glancing. See what fills the space. Notice what you reach for out of habit.', cat: 'wellness' },
+  { title: 'Do one thing that scares you a little', desc: 'Not dangerous — just outside your comfort zone. The size of the action does not matter. Doing it does.', cat: 'wellness' },
+];
+
+// ═══════════════════════════════════════════════
+// STATE
+// ═══════════════════════════════════════════════
+let state = {
+  items: [],
+  reflections: [],
+  challengeIndex: 0,
+  challengeDate: '',
+  challengeDone: false,
+  selectedCat: 'nature',
+  photoCache: {},
+};
+
+// Modal state
+let modalItemId = null;
+let modalRating = 0;
+let modalIsChallenge = false;
+
+// ═══════════════════════════════════════════════
+// PERSISTENCE
+// ═══════════════════════════════════════════════
+function saveState() {
+  try { localStorage.setItem('thrive_v1', JSON.stringify(state)); } catch(e) {}
+}
+
+function loadState() {
+  try {
+    const saved = localStorage.getItem('thrive_v1');
+    if (saved) state = { ...state, ...JSON.parse(saved) };
+  } catch(e) {}
+}
+
+// ═══════════════════════════════════════════════
+// UNSPLASH
+// ═══════════════════════════════════════════════
+async function fetchPhoto(catId) {
+  if (state.photoCache[catId]) return state.photoCache[catId];
+  const cat = CATEGORIES.find(c => c.id === catId);
+  if (!cat) return null;
+  try {
+    const res = await fetch(
+      `https://api.unsplash.com/photos/random?query=${encodeURIComponent(cat.query)}&orientation=landscape&client_id=${UNSPLASH_KEY}`
+    );
+    if (!res.ok) return null;
+    const data = await res.json();
+    const url = data?.urls?.regular || data?.urls?.small;
+    if (url) {
+      state.photoCache[catId] = url;
+      saveState();
+    }
+    return url || null;
+  } catch(e) { return null; }
+}
+
+// ═══════════════════════════════════════════════
+// PAGE NAVIGATION
+// ═══════════════════════════════════════════════
+function showPage(name) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('page-' + name).classList.add('active');
+  document.getElementById('nav-' + name).classList.add('active');
+  if (name === 'list') renderList();
+  if (name === 'today') renderTodayPills();
+}
+
+// ═══════════════════════════════════════════════
+// TODAY SCREEN
+// ═══════════════════════════════════════════════
+function getToday() {
+  return new Date().toISOString().slice(0, 10);
+}
+
+function initChallenge() {
+  const today = getToday();
+  if (state.challengeDate !== today) {
+    state.challengeDate = today;
+    state.challengeIndex = (state.challengeIndex + 1) % CHALLENGES.length;
+    state.challengeDone = false;
+    saveState();
+  }
+  renderChallenge();
+}
+
+function renderChallenge() {
+  const c = CHALLENGES[state.challengeIndex % CHALLENGES.length];
+  const cat = CATEGORIES.find(x => x.id === c.cat);
+
+  document.getElementById('challengeTitle').textContent = c.title;
+  document.getElementById('challengeDesc').textContent = c.desc;
+  document.getElementById('challengeTagLabel').textContent = `Daily Challenge · ${cat.label}`;
+  document.getElementById('challengeTagDot').style.background = cat.color;
+
+  // Hero date
+  const now = new Date();
+  document.getElementById('heroDate').textContent = now.toLocaleDateString('en-GB', { weekday: 'short', day: 'numeric', month: 'short' });
+
+  // Hero fallback class
+  const fallback = document.getElementById('heroFallback');
+  fallback.className = `hero-fallback ${c.cat}`;
+
+  // Done state
+  const btn = document.getElementById('btnDone');
+  if (state.challengeDone) {
+    btn.textContent = '✓ Done for today';
+    btn.classList.add('completed');
+    btn.disabled = true;
+    btn.style.opacity = '0.7';
+  } else {
+    btn.textContent = 'I did this ✓';
+    btn.classList.remove('completed');
+    btn.disabled = false;
+    btn.style.opacity = '';
+  }
+
+  // Load hero photo
+  loadHeroPhoto(c.cat);
+  renderTodayPills();
+}
+
+async function loadHeroPhoto(catId) {
+  const img = document.getElementById('heroImg');
+  img.classList.add('loading');
+  const url = await fetchPhoto(catId);
+  if (url) {
+    img.src = url;
+    img.onload = () => img.classList.remove('loading');
+  }
+}
+
+function skipChallenge() {
+  if (state.challengeDone) { showToast('Already completed today — try another day!'); return; }
+  state.challengeIndex = (state.challengeIndex + 1) % CHALLENGES.length;
+  saveState();
+  renderChallenge();
+  showToast('New challenge loaded');
+}
+
+function handleChallengeComplete() {
+  if (state.challengeDone) return;
+  const c = CHALLENGES[state.challengeIndex % CHALLENGES.length];
+  // Add to items if not already there
+  const exists = state.items.find(i => i.isChallenge && i.challengeIndex === state.challengeIndex);
+  if (!exists) {
+    const id = Date.now();
+    state.items.unshift({
+      id,
+      title: c.title,
+      cat: c.cat,
+      done: true,
+      isChallenge: true,
+      challengeIndex: state.challengeIndex,
+      addedAt: Date.now(),
+    });
+    saveState();
+    openModal(id, true);
+  } else {
+    openModal(exists.id, true);
+  }
+}
+
+function renderTodayPills() {
+  const container = document.getElementById('todayPills');
+  const pending = state.items.filter(i => !i.done && !i.isChallenge);
+  if (pending.length === 0) {
+    container.innerHTML = `<div class="empty-pills">Nothing on your list yet — add something to try.</div>`;
+    return;
+  }
+  container.innerHTML = pending.slice(0, 4).map(item => {
+    const cat = CATEGORIES.find(c => c.id === item.cat);
+    return `<div class="list-pill" onclick="showPage('list')">
+      <div class="pill-dot" style="background:${cat ? cat.color : '#aaa'}"></div>
+      ${item.title}
+    </div>`;
+  }).join('');
+}
+
+// ═══════════════════════════════════════════════
+// MY LIST SCREEN
+// ═══════════════════════════════════════════════
+function initCatPicker() {
+  const picker = document.getElementById('catPicker');
+  picker.innerHTML = CATEGORIES.map(c =>
+    `<div class="cat-chip ${state.selectedCat === c.id ? 'selected' : ''}"
+          onclick="selectCat('${c.id}')">
+       ${c.emoji} ${c.label}
+     </div>`
+  ).join('');
+}
+
+function selectCat(id) {
+  state.selectedCat = id;
+  initCatPicker();
+}
+
+async function addItem() {
+  const input = document.getElementById('addInput');
+  const title = input.value.trim();
+  if (!title) { input.focus(); return; }
+
+  const id = Date.now();
+  const newItem = {
+    id,
+    title,
+    cat: state.selectedCat,
+    done: false,
+    addedAt: Date.now(),
+  };
+
+  state.items.unshift(newItem);
+  saveState();
+  input.value = '';
+  renderList();
+  renderTodayPills();
+  showToast('Added to your list ✦');
+
+  // Fetch image in background (cached for rendering)
+  fetchPhoto(state.selectedCat);
+}
+
+function renderList() {
+  const pending = state.items.filter(i => !i.done);
+  const done = state.items.filter(i => i.done);
+  const all = [...pending, ...done];
+
+  const countEl = document.getElementById('itemCount');
+  countEl.textContent = pending.length === 1 ? '1 to try' : `${pending.length} to try`;
+
+  const emptyEl = document.getElementById('emptyList');
+  const listEl = document.getElementById('listItems');
+
+  if (all.length === 0) {
+    emptyEl.style.display = 'block';
+    listEl.innerHTML = '';
+    return;
+  }
+
+  emptyEl.style.display = 'none';
+
+  // Pending section
+  let html = '';
+  if (pending.length > 0) {
+    html += `<div class="list-section-label" style="margin-bottom:10px">To try</div>`;
+    html += pending.map(item => itemHTML(item)).join('');
+  }
+  if (done.length > 0) {
+    html += `<div class="list-section-label" style="margin-top:20px;margin-bottom:10px">Completed</div>`;
+    html += done.map(item => itemHTML(item)).join('');
+  }
+
+  listEl.innerHTML = html;
+
+  // Load images async
+  all.forEach(item => {
+    const cat = CATEGORIES.find(c => c.id === item.cat);
+    const cached = state.photoCache[item.cat];
+    if (cached) {
+      const imgEl = document.getElementById(`img-${item.id}`);
+      if (imgEl) {
+        imgEl.src = cached;
+        imgEl.onload = () => imgEl.classList.remove('loading');
+      }
+    } else {
+      fetchPhoto(item.cat).then(url => {
+        if (url) {
+          const imgEl = document.getElementById(`img-${item.id}`);
+          if (imgEl) {
+            imgEl.src = url;
+            imgEl.onload = () => imgEl.classList.remove('loading');
+          }
+        }
+      });
+    }
+  });
+
+  initCatPicker();
+}
+
+function itemHTML(item) {
+  const cat = CATEGORIES.find(c => c.id === item.cat);
+  return `
+    <div class="bucket-item ${item.done ? 'done' : ''}" onclick="toggleItem(${item.id})">
+      <div class="item-img-wrap">
+        <div class="item-img-fallback">${cat ? cat.emoji : '✦'}</div>
+        <img class="item-img loading" id="img-${item.id}" alt="${item.title}" />
+      </div>
+      <div class="item-info">
+        <div class="item-title">${item.title}</div>
+        <div class="item-meta">
+          <div class="item-cat-dot" style="background:${cat ? cat.color : '#aaa'}"></div>
+          <span>${cat ? cat.label : ''}</span>
+        </div>
+      </div>
+      <div class="item-check">${item.done ? '✓' : ''}</div>
+    </div>`;
+}
+
+function toggleItem(id) {
+  const item = state.items.find(i => i.id === id);
+  if (!item) return;
+  if (item.done) {
+    // Undo
+    item.done = false;
+    saveState();
+    renderList();
+    renderTodayPills();
+    showToast('Marked as to try again');
+  } else {
+    // Complete
+    item.done = true;
+    saveState();
+    openModal(id, false);
+    renderList();
+    renderTodayPills();
+  }
+}
+
+// ═══════════════════════════════════════════════
+// REFLECTION MODAL
+// ═══════════════════════════════════════════════
+function openModal(itemId, isChallenge) {
+  modalItemId = itemId;
+  modalRating = 0;
+  modalIsChallenge = isChallenge;
+
+  const item = state.items.find(i => i.id === itemId);
+  if (!item) return;
+
+  const cat = CATEGORIES.find(c => c.id === item.cat);
+
+  // Populate
+  document.getElementById('modalTitle').textContent = item.title;
+  document.getElementById('modalCatLabel').textContent = cat ? cat.label : '';
+  document.getElementById('modalCatDot').style.background = cat ? cat.color : '#aaa';
+  document.getElementById('modalFallbackEmoji').textContent = cat ? cat.emoji : '✦';
+  document.getElementById('noteArea').value = '';
+
+  // Image
+  const modalImg = document.getElementById('modalImg');
+  const cached = state.photoCache[item.cat];
+  if (cached) {
+    modalImg.src = cached;
+    modalImg.style.display = 'block';
+  } else {
+    modalImg.style.display = 'none';
+  }
+
+  // Reset stars
+  document.querySelectorAll('.star-btn').forEach(s => s.classList.remove('lit'));
+
+  // Open
+  document.getElementById('modalOverlay').classList.add('open');
+
+  // If challenge, mark done
+  if (isChallenge) {
+    state.challengeDone = true;
+    saveState();
+    renderChallenge();
+  }
+}
+
+function closeModal() {
+  document.getElementById('modalOverlay').classList.remove('open');
+  modalItemId = null;
+  modalRating = 0;
+}
+
+function handleOverlayClick(e) {
+  if (e.target === document.getElementById('modalOverlay')) closeModal();
+}
+
+function setStar(v) {
+  modalRating = v;
+  document.querySelectorAll('.star-btn').forEach(s => {
+    s.classList.toggle('lit', parseInt(s.dataset.v) <= v);
+  });
+}
+
+function saveReflection() {
+  if (!modalItemId) { closeModal(); return; }
+  const note = document.getElementById('noteArea').value.trim();
+  const rating = modalRating || 3;
+
+  // Remove old reflection for this item
+  state.reflections = state.reflections.filter(r => r.itemId !== modalItemId);
+  state.reflections.unshift({
+    itemId: modalItemId,
+    rating,
+    note,
+    date: Date.now(),
+  });
+
+  saveState();
+  closeModal();
+  showToast('Reflection saved ✦');
+}
+
+function skipReflection() {
+  closeModal();
+}
+
+// ═══════════════════════════════════════════════
+// TOAST
+// ═══════════════════════════════════════════════
+let toastTimer;
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => t.classList.remove('show'), 2400);
+}
+
+// ═══════════════════════════════════════════════
+// BOOT
+// ═══════════════════════════════════════════════
+loadState();
+initChallenge();
+initCatPicker();
+</script>
+</body>
+</html>
