@@ -5,1349 +5,764 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>Thrive</title>
 <link href="https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,500;1,400;1,500&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
-  :root {
-    --bg: #f7f5f0;
-    --white: #ffffff;
-    --ink: #1c1c1a;
-    --ink2: #5a5a54;
-    --ink3: #a8a89a;
-    --ink4: #dddcd7;
-    --accent: #2d6a4f;
-    --accent-l: #e8f3ed;
-    --shadow: 0 2px 20px rgba(0,0,0,0.07);
-    --radius: 16px;
-  }
-
-  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
-
-  html { height: 100%; }
-
-  body {
-    font-family: 'DM Sans', sans-serif;
-    background: var(--bg);
-    color: var(--ink);
-    max-width: 430px;
-    margin: 0 auto;
-    height: 100%;
-    overflow: hidden;
-    position: relative;
-  }
-
-  /* ── APP SHELL ─────────────────────── */
-  .app {
-    display: flex;
-    flex-direction: column;
-    height: 100vh;
-    height: 100dvh;
-    overflow: hidden;
-    position: relative;
-  }
-
-  /* ── PAGES ─────────────────────────── */
-  .page {
-    position: absolute;
-    inset: 0;
-    display: flex;
-    flex-direction: column;
-    opacity: 0;
-    pointer-events: none;
-    transform: translateY(12px);
-    transition: opacity 0.28s ease, transform 0.28s ease;
-    overflow: hidden;
-  }
-
-  .page.active {
-    opacity: 1;
-    pointer-events: all;
-    transform: translateY(0);
-  }
-
-  /* ── BOTTOM NAV ────────────────────── */
-  .bottom-nav {
-    position: fixed;
-    bottom: 0; left: 50%; 
-    transform: translateX(-50%);
-    width: 100%;
-    max-width: 430px;
-    background: rgba(247,245,240,0.96);
-    backdrop-filter: blur(16px);
-    -webkit-backdrop-filter: blur(16px);
-    border-top: 1px solid var(--ink4);
-    display: flex;
-    padding: 10px 0 max(16px, env(safe-area-inset-bottom));
-    z-index: 200;
-  }
-
-  .nav-btn {
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 4px;
-    background: none;
-    border: none;
-    cursor: pointer;
-    padding: 4px 0;
-    transition: all 0.2s;
-  }
-
-  .nav-btn .nav-icon { font-size: 20px; line-height: 1; transition: transform 0.2s; }
-  .nav-btn .nav-label { font-size: 9px; letter-spacing: 1px; text-transform: uppercase; color: var(--ink4); transition: color 0.2s; font-weight: 500; }
-  .nav-btn.active .nav-label { color: var(--ink); }
-  .nav-btn.active .nav-icon { transform: scale(1.1); }
-
-  /* ══════════════════════════════════════
-     PAGE 1 — TODAY
-  ══════════════════════════════════════ */
-  #page-today { background: var(--bg); }
-
-  .hero-wrap {
-    position: relative;
-    height: 260px;
-    flex-shrink: 0;
-    overflow: hidden;
-  }
-
-  .hero-img {
-    width: 100%; height: 100%;
-    object-fit: cover;
-    display: block;
-    transition: opacity 0.6s ease;
-  }
-
-  .hero-img.loading { opacity: 0; }
-
-  /* CSS fallback scene (shown while image loads) */
-  .hero-fallback {
-    position: absolute;
-    inset: 0;
-    transition: opacity 0.4s ease;
-  }
-
-  .hero-fallback.nature {
-    background: linear-gradient(180deg, #b8dde8 0%, #c8e4d0 40%, #8aad7a 70%, #3a6248 100%);
-  }
-  .hero-fallback.arts {
-    background: linear-gradient(180deg, #e8d8c8 0%, #d4b898 40%, #c09878 70%, #8a6848 100%);
-  }
-  .hero-fallback.food {
-    background: linear-gradient(180deg, #f0e0c8 0%, #e8c89a 40%, #d4a870 70%, #b88848 100%);
-  }
-  .hero-fallback.fitness {
-    background: linear-gradient(180deg, #c8d8e8 0%, #a8c0d0 40%, #7898b0 70%, #486880 100%);
-  }
-  .hero-fallback.social {
-    background: linear-gradient(180deg, #e8e0d8 0%, #d8c8b8 40%, #c0a890 70%, #a08870 100%);
-  }
-  .hero-fallback.wellness {
-    background: linear-gradient(180deg, #c8e0e8 0%, #a8c8d8 40%, #88b0c0 70%, #608090 100%);
-  }
-
-  .hero-overlay {
-    position: absolute;
-    inset: 0;
-    background: linear-gradient(
-      to bottom,
-      rgba(247,245,240,0) 0%,
-      rgba(247,245,240,0) 45%,
-      rgba(247,245,240,0.5) 68%,
-      rgba(247,245,240,1) 100%
-    );
-  }
-
-  .hero-top-bar {
-    position: absolute;
-    top: 0; left: 0; right: 0;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 48px 20px 12px;
-    z-index: 5;
-  }
-
-  .hero-logo {
-    font-family: 'Lora', serif;
-    font-style: italic;
-    font-size: 22px;
-    color: rgba(255,255,255,0.95);
-    text-shadow: 0 1px 12px rgba(0,0,0,0.25);
-    letter-spacing: -0.3px;
-  }
-
-  .hero-date {
-    font-size: 11px;
-    color: rgba(255,255,255,0.75);
-    text-shadow: 0 1px 6px rgba(0,0,0,0.3);
-    letter-spacing: 0.5px;
-  }
-
-  /* Today body */
-  .today-body {
-    flex: 1;
-    overflow-y: auto;
-    padding: 12px 20px 100px;
-    -webkit-overflow-scrolling: touch;
-  }
-
-  .challenge-tag {
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    font-size: 9px;
-    letter-spacing: 2px;
-    text-transform: uppercase;
-    color: var(--accent);
-    margin-bottom: 8px;
-    font-weight: 500;
-  }
-
-  .tag-dot {
-    width: 6px; height: 6px;
-    border-radius: 50%;
-    background: var(--accent);
-    flex-shrink: 0;
-  }
-
-  .challenge-title {
-    font-family: 'Lora', serif;
-    font-size: 22px;
-    font-style: italic;
-    font-weight: 400;
-    color: var(--ink);
-    line-height: 1.35;
-    margin-bottom: 8px;
-  }
-
-  .challenge-desc {
-    font-size: 13px;
-    color: var(--ink3);
-    line-height: 1.65;
-    margin-bottom: 20px;
-    font-weight: 300;
-  }
-
-  .challenge-actions {
-    display: flex;
-    gap: 10px;
-    margin-bottom: 28px;
-  }
-
-  .btn-done {
-    flex: 1;
-    background: var(--ink);
-    color: var(--bg);
-    border: none;
-    border-radius: 14px;
-    padding: 14px 20px;
-    font-family: 'DM Sans', sans-serif;
-    font-size: 14px;
-    font-weight: 500;
-    cursor: pointer;
-    transition: all 0.18s;
-    letter-spacing: 0.2px;
-  }
-
-  .btn-done:active { transform: scale(0.97); opacity: 0.85; }
-  .btn-done.completed { background: var(--accent); }
-
-  .btn-skip {
-    width: 50px;
-    background: var(--white);
-    border: 1px solid var(--ink4);
-    border-radius: 14px;
-    font-size: 17px;
-    cursor: pointer;
-    transition: all 0.18s;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    flex-shrink: 0;
-  }
-
-  .btn-skip:active { transform: scale(0.95); }
-
-  .divider {
-    border: none;
-    border-top: 1px solid var(--ink4);
-    margin-bottom: 18px;
-  }
-
-  .section-label {
-    font-size: 9px;
-    letter-spacing: 2px;
-    text-transform: uppercase;
-    color: var(--ink4);
-    margin-bottom: 12px;
-    font-weight: 500;
-  }
-
-  /* Quick list pills on Today */
-  .list-pills {
-    display: flex;
-    gap: 8px;
-    flex-wrap: wrap;
-  }
-
-  .list-pill {
-    display: flex;
-    align-items: center;
-    gap: 7px;
-    background: var(--white);
-    border: 1px solid var(--ink4);
-    border-radius: 20px;
-    padding: 7px 13px;
-    font-size: 12px;
-    color: var(--ink2);
-    cursor: pointer;
-    transition: all 0.18s;
-  }
-
-  .list-pill:active { background: var(--ink4); }
-
-  .pill-dot {
-    width: 6px; height: 6px;
-    border-radius: 50%;
-    flex-shrink: 0;
-  }
-
-  .empty-pills {
-    font-size: 13px;
-    color: var(--ink3);
-    font-style: italic;
-    font-weight: 300;
-  }
-
-  /* ══════════════════════════════════════
-     PAGE 2 — MY LIST
-  ══════════════════════════════════════ */
-  #page-list { background: var(--bg); }
-
-  .list-header {
-    padding: 52px 20px 16px;
-    border-bottom: 1px solid var(--ink4);
-    flex-shrink: 0;
-    background: var(--bg);
-  }
-
-  .list-header-top {
-    display: flex;
-    justify-content: space-between;
-    align-items: baseline;
-    margin-bottom: 14px;
-  }
-
-  .list-header-top h2 {
-    font-family: 'Lora', serif;
-    font-size: 22px;
-    font-style: italic;
-    font-weight: 400;
-    color: var(--ink);
-  }
-
-  .item-count {
-    font-size: 12px;
-    color: var(--ink3);
-    background: var(--white);
-    border: 1px solid var(--ink4);
-    padding: 3px 10px;
-    border-radius: 20px;
-  }
-
-  /* Add bar */
-  .add-bar {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    background: var(--white);
-    border: 1px solid var(--ink4);
-    border-radius: 14px;
-    padding: 10px 12px;
-    box-shadow: var(--shadow);
-  }
-
-  .add-input {
-    flex: 1;
-    background: none;
-    border: none;
-    outline: none;
-    font-family: 'DM Sans', sans-serif;
-    font-size: 14px;
-    color: var(--ink);
-    font-weight: 300;
-  }
-
-  .add-input::placeholder { color: var(--ink4); }
-
-  .add-input-btn {
-    background: var(--ink);
-    color: var(--bg);
-    border: none;
-    border-radius: 10px;
-    padding: 7px 14px;
-    font-family: 'DM Sans', sans-serif;
-    font-size: 12px;
-    font-weight: 500;
-    cursor: pointer;
-    transition: all 0.18s;
-    white-space: nowrap;
-    flex-shrink: 0;
-  }
-
-  .add-input-btn:active { transform: scale(0.96); }
-
-  /* Category picker */
-  .cat-picker {
-    display: flex;
-    gap: 6px;
-    flex-wrap: wrap;
-    padding: 12px 20px;
-    background: var(--bg);
-    border-bottom: 1px solid var(--ink4);
-    flex-shrink: 0;
-  }
-
-  .cat-chip {
-    padding: 5px 12px;
-    border-radius: 20px;
-    border: 1px solid var(--ink4);
-    background: var(--white);
-    font-size: 11px;
-    color: var(--ink2);
-    cursor: pointer;
-    transition: all 0.18s;
-    font-family: 'DM Sans', sans-serif;
-    display: flex;
-    align-items: center;
-    gap: 5px;
-  }
-
-  .cat-chip.selected {
-    background: var(--ink);
-    color: var(--bg);
-    border-color: var(--ink);
-  }
-
-  /* List */
-  .list-scroll {
-    flex: 1;
-    overflow-y: auto;
-    padding: 14px 20px 100px;
-    -webkit-overflow-scrolling: touch;
-  }
-
-  .list-section-label {
-    font-size: 9px;
-    letter-spacing: 2px;
-    text-transform: uppercase;
-    color: var(--ink4);
-    margin-bottom: 10px;
-    font-weight: 500;
-  }
-
-  .bucket-item {
-    display: flex;
-    align-items: center;
-    gap: 13px;
-    background: var(--white);
-    border-radius: var(--radius);
-    padding: 12px 14px;
-    margin-bottom: 8px;
-    box-shadow: var(--shadow);
-    cursor: pointer;
-    transition: all 0.2s;
-    animation: slideIn 0.25s ease;
-  }
-
-  @keyframes slideIn {
-    from { opacity: 0; transform: translateY(-8px); }
-    to { opacity: 1; transform: translateY(0); }
-  }
-
-  .bucket-item:active { transform: scale(0.98); }
-  .bucket-item.done { opacity: 0.4; box-shadow: none; }
-  .bucket-item.done .item-title { text-decoration: line-through; }
-
-  .item-img-wrap {
-    width: 46px; height: 46px;
-    border-radius: 12px;
-    overflow: hidden;
-    flex-shrink: 0;
-    background: var(--ink4);
-    position: relative;
-  }
-
-  .item-img {
-    width: 100%; height: 100%;
-    object-fit: cover;
-    display: block;
-    transition: opacity 0.4s;
-  }
-
-  .item-img.loading { opacity: 0; }
-
-  .item-img-fallback {
-    position: absolute;
-    inset: 0;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 20px;
-  }
-
-  .item-info { flex: 1; overflow: hidden; }
-
-  .item-title {
-    font-size: 14px;
-    font-weight: 400;
-    color: var(--ink);
-    margin-bottom: 4px;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-  }
-
-  .item-meta {
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    font-size: 11px;
-    color: var(--ink3);
-  }
-
-  .item-cat-dot {
-    width: 5px; height: 5px;
-    border-radius: 50%;
-    flex-shrink: 0;
-  }
-
-  .item-check {
-    width: 24px; height: 24px;
-    border-radius: 50%;
-    border: 1.5px solid var(--ink4);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    flex-shrink: 0;
-    font-size: 11px;
-    color: transparent;
-    transition: all 0.2s;
-    flex-shrink: 0;
-  }
-
-  .bucket-item.done .item-check {
-    background: var(--accent);
-    border-color: var(--accent);
-    color: white;
-  }
-
-  .empty-list {
-    text-align: center;
-    padding: 60px 20px;
-    color: var(--ink3);
-  }
-
-  .empty-list .empty-icon { font-size: 40px; margin-bottom: 14px; }
-  .empty-list p { font-size: 14px; line-height: 1.6; font-weight: 300; font-style: italic; font-family: 'Lora', serif; }
-
-  /* ══════════════════════════════════════
-     REFLECTION MODAL
-  ══════════════════════════════════════ */
-  .modal-overlay {
-    position: fixed;
-    inset: 0;
-    background: rgba(28,28,26,0);
-    z-index: 500;
-    display: flex;
-    align-items: flex-end;
-    justify-content: center;
-    pointer-events: none;
-    transition: background 0.3s ease;
-  }
-
-  .modal-overlay.open {
-    background: rgba(28,28,26,0.48);
-    pointer-events: all;
-  }
-
-  .modal-sheet {
-    width: 100%;
-    max-width: 430px;
-    background: var(--white);
-    border-radius: 26px 26px 0 0;
-    padding: 0 22px max(28px, env(safe-area-inset-bottom));
-    box-shadow: 0 -8px 48px rgba(0,0,0,0.18);
-    transform: translateY(100%);
-    transition: transform 0.35s cubic-bezier(0.32, 0.72, 0, 1);
-    will-change: transform;
-  }
-
-  .modal-overlay.open .modal-sheet {
-    transform: translateY(0);
-  }
-
-  .modal-handle {
-    width: 36px; height: 4px;
-    background: var(--ink4);
-    border-radius: 2px;
-    margin: 14px auto 22px;
-  }
-
-  .modal-item-preview {
-    display: flex;
-    align-items: center;
-    gap: 13px;
-    background: var(--bg);
-    border-radius: 14px;
-    padding: 12px 14px;
-    margin-bottom: 22px;
-  }
-
-  .modal-item-img {
-    width: 44px; height: 44px;
-    border-radius: 11px;
-    overflow: hidden;
-    flex-shrink: 0;
-    background: var(--ink4);
-    position: relative;
-  }
-
-  .modal-item-img img {
-    width: 100%; height: 100%;
-    object-fit: cover;
-    display: block;
-  }
-
-  .modal-item-img .fallback-emoji {
-    position: absolute;
-    inset: 0;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 20px;
-  }
-
-  .modal-item-title { font-size: 15px; font-weight: 400; color: var(--ink); margin-bottom: 3px; }
-  .modal-item-cat {
-    display: flex; align-items: center; gap: 5px;
-    font-size: 11px; color: var(--ink3);
-  }
-
-  .modal-q {
-    font-family: 'Lora', serif;
-    font-size: 18px;
-    font-style: italic;
-    font-weight: 400;
-    color: var(--ink);
-    margin-bottom: 4px;
-  }
-
-  .modal-sub {
-    font-size: 12px;
-    color: var(--ink3);
-    margin-bottom: 18px;
-    font-weight: 300;
-  }
-
-  .star-row {
-    display: flex;
-    gap: 8px;
-    margin-bottom: 18px;
-  }
-
-  .star-btn {
-    font-size: 32px;
-    background: none;
-    border: none;
-    cursor: pointer;
-    color: var(--ink4);
-    transition: all 0.15s;
-    padding: 0;
-    line-height: 1;
-  }
-
-  .star-btn.lit { color: #e8b84b; }
-  .star-btn:active { transform: scale(1.25); }
-
-  .note-area {
-    width: 100%;
-    background: var(--bg);
-    border: 1px solid var(--ink4);
-    border-radius: 14px;
-    padding: 13px 14px;
-    font-family: 'DM Sans', sans-serif;
-    font-size: 13px;
-    color: var(--ink);
-    resize: none;
-    height: 80px;
-    outline: none;
-    margin-bottom: 16px;
-    font-weight: 300;
-    line-height: 1.6;
-    transition: border-color 0.2s;
-  }
-
-  .note-area::placeholder { color: var(--ink4); font-style: italic; }
-  .note-area:focus { border-color: var(--ink3); }
-
-  .modal-actions { display: flex; gap: 10px; }
-
-  .btn-save {
-    flex: 1;
-    background: var(--ink);
-    color: var(--bg);
-    border: none;
-    border-radius: 14px;
-    padding: 14px;
-    font-family: 'DM Sans', sans-serif;
-    font-size: 14px;
-    font-weight: 500;
-    cursor: pointer;
-    transition: all 0.18s;
-    letter-spacing: 0.2px;
-  }
-
-  .btn-save:active { transform: scale(0.97); }
-
-  .btn-modal-skip {
-    background: var(--bg);
-    color: var(--ink3);
-    border: 1px solid var(--ink4);
-    border-radius: 14px;
-    padding: 14px 18px;
-    font-family: 'DM Sans', sans-serif;
-    font-size: 14px;
-    cursor: pointer;
-    transition: all 0.18s;
-  }
-
-  /* ── TOAST ─────────────────────────── */
-  .toast {
-    position: fixed;
-    top: 60px;
-    left: 50%;
-    transform: translateX(-50%) translateY(-20px);
-    background: var(--ink);
-    color: var(--bg);
-    padding: 10px 20px;
-    border-radius: 20px;
-    font-size: 13px;
-    font-weight: 400;
-    z-index: 1000;
-    opacity: 0;
-    transition: all 0.25s ease;
-    white-space: nowrap;
-    pointer-events: none;
-  }
-
-  .toast.show {
-    opacity: 1;
-    transform: translateX(-50%) translateY(0);
-  }
-
-  /* ── LOADING SHIMMER ───────────────── */
-  @keyframes shimmer {
-    0% { background-position: -400px 0; }
-    100% { background-position: 400px 0; }
-  }
-
-  .shimmer {
-    background: linear-gradient(90deg, #f0eee8 25%, #e8e6e0 50%, #f0eee8 75%);
-    background-size: 400px 100%;
-    animation: shimmer 1.4s infinite;
-  }
-
-  /* ── SCROLLBAR HIDE ────────────────── */
-  .today-body::-webkit-scrollbar,
-  .list-scroll::-webkit-scrollbar { display: none; }
-  .today-body, .list-scroll { -ms-overflow-style: none; scrollbar-width: none; }
+:root {
+  --bg: #f7f5f0;
+  --white: #ffffff;
+  --ink: #1c1c1a;
+  --ink2: #5a5a54;
+  --ink3: #a8a89a;
+  --ink4: #dddcd7;
+  --accent: #2d6a4f;
+  --shadow: 0 2px 20px rgba(0,0,0,0.07);
+  --radius: 16px;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+html, body { height: 100%; font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--ink); overflow: hidden; }
+body { max-width: 430px; margin: 0 auto; }
+
+/* ── LOADING ── */
+#loading {
+  position: fixed; inset: 0; max-width: 430px; margin: 0 auto;
+  background: var(--bg); display: flex; align-items: center; justify-content: center;
+  z-index: 3000; transition: opacity 0.4s ease;
+}
+#loading.gone { opacity: 0; pointer-events: none; }
+.loading-logo {
+  font-family: 'Lora', serif; font-style: italic; font-size: 38px; color: var(--ink);
+  animation: fadeUp 0.7s 0.1s both;
+}
+@keyframes fadeUp { from { opacity:0; transform:translateY(12px); } to { opacity:1; transform:translateY(0); } }
+
+/* ── AUTH ── */
+#auth {
+  position: fixed; inset: 0; max-width: 430px; margin: 0 auto;
+  background: var(--bg); display: flex; flex-direction: column;
+  z-index: 2000; transition: opacity 0.3s ease;
+}
+#auth.gone { opacity: 0; pointer-events: none; }
+
+.auth-hero {
+  height: 200px; position: relative; flex-shrink: 0; overflow: hidden;
+  background: linear-gradient(180deg, #b8dde8 0%, #c8e4d0 40%, #8aad7a 70%, #3a6248 100%);
+}
+.auth-hero-fade {
+  position: absolute; inset: 0;
+  background: linear-gradient(to bottom, transparent 30%, var(--bg) 100%);
+}
+.auth-logo-big {
+  position: absolute; bottom: 18px; left: 24px;
+  font-family: 'Lora', serif; font-style: italic; font-size: 30px;
+  color: rgba(255,255,255,0.95); text-shadow: 0 1px 10px rgba(0,0,0,0.2);
+}
+
+.auth-body { flex: 1; padding: 6px 26px 40px; overflow-y: auto; }
+
+.auth-tagline {
+  font-family: 'Lora', serif; font-style: italic;
+  font-size: 17px; color: var(--ink); margin-bottom: 5px; line-height: 1.4;
+}
+.auth-sub { font-size: 12px; color: var(--ink3); margin-bottom: 24px; font-weight: 300; line-height: 1.6; }
+
+.auth-tabs { display: flex; border-bottom: 1px solid var(--ink4); margin-bottom: 20px; }
+.auth-tab {
+  flex: 1; background: none; border: none;
+  border-bottom: 2px solid transparent; margin-bottom: -1px;
+  padding: 10px 0; font-family: 'DM Sans', sans-serif;
+  font-size: 13px; font-weight: 500; color: var(--ink3);
+  cursor: pointer; transition: all 0.2s;
+}
+.auth-tab.on { color: var(--ink); border-bottom-color: var(--ink); }
+
+.auth-form { display: flex; flex-direction: column; gap: 11px; }
+.auth-form.hide { display: none; }
+
+.field-label { font-size: 10px; letter-spacing: 1px; text-transform: uppercase; color: var(--ink3); font-weight: 500; margin-bottom: 4px; display: block; }
+
+.auth-input {
+  width: 100%; background: var(--white); border: 1px solid var(--ink4);
+  border-radius: 12px; padding: 13px 14px;
+  font-family: 'DM Sans', sans-serif; font-size: 14px; color: var(--ink);
+  outline: none; transition: border-color 0.2s;
+}
+.auth-input:focus { border-color: var(--ink3); }
+
+.auth-btn {
+  background: var(--ink); color: var(--bg); border: none;
+  border-radius: 14px; padding: 15px;
+  font-family: 'DM Sans', sans-serif; font-size: 14px; font-weight: 500;
+  cursor: pointer; transition: all 0.18s; margin-top: 4px; letter-spacing: 0.2px;
+}
+.auth-btn:active { transform: scale(0.97); }
+.auth-btn:disabled { opacity: 0.5; pointer-events: none; }
+
+.auth-msg {
+  font-size: 12px; border-radius: 10px; padding: 10px 13px;
+  display: none; line-height: 1.5;
+}
+.auth-msg.show { display: block; }
+.auth-msg.err { color: #b03030; background: #fdf0ee; }
+.auth-msg.ok  { color: var(--accent); background: #e8f3ed; }
+
+/* ── APP ── */
+.app { display: flex; flex-direction: column; height: 100vh; height: 100dvh; overflow: hidden; position: relative; }
+
+.page {
+  position: absolute; inset: 0; display: flex; flex-direction: column;
+  opacity: 0; pointer-events: none;
+  transform: translateY(10px);
+  transition: opacity 0.25s ease, transform 0.25s ease;
+  overflow: hidden;
+}
+.page.on { opacity: 1; pointer-events: all; transform: translateY(0); }
+
+/* ── NAV ── */
+.bottom-nav {
+  position: fixed; bottom: 0; left: 50%; transform: translateX(-50%);
+  width: 100%; max-width: 430px;
+  background: rgba(247,245,240,0.96);
+  backdrop-filter: blur(16px);
+  border-top: 1px solid var(--ink4);
+  display: flex; padding: 10px 0 max(16px, env(safe-area-inset-bottom));
+  z-index: 200;
+}
+.nav-btn {
+  flex: 1; display: flex; flex-direction: column; align-items: center; gap: 4px;
+  background: none; border: none; cursor: pointer; padding: 4px 0; transition: all 0.2s;
+}
+.nav-btn .ni { font-size: 20px; line-height: 1; transition: transform 0.2s; }
+.nav-btn .nl { font-size: 9px; letter-spacing: 1px; text-transform: uppercase; color: var(--ink4); font-weight: 500; transition: color 0.2s; }
+.nav-btn.on .nl { color: var(--ink); }
+.nav-btn.on .ni { transform: scale(1.1); }
+
+/* ── TODAY ── */
+.hero-wrap { position: relative; height: 255px; flex-shrink: 0; overflow: hidden; }
+.hero-photo { width: 100%; height: 100%; object-fit: cover; display: block; transition: opacity 0.7s ease; }
+.hero-photo.dim { opacity: 0; }
+.hero-fallback {
+  position: absolute; inset: 0; transition: opacity 0.3s;
+}
+.hf-nature  { background: linear-gradient(180deg,#b8dde8 0%,#c8e4d0 40%,#8aad7a 70%,#3a6248 100%); }
+.hf-arts    { background: linear-gradient(180deg,#e8d8c8 0%,#d4b898 40%,#c09878 70%,#8a6848 100%); }
+.hf-food    { background: linear-gradient(180deg,#f0e0c8 0%,#e8c89a 40%,#d4a870 70%,#b88848 100%); }
+.hf-fitness { background: linear-gradient(180deg,#c8d8e8 0%,#a8c0d0 40%,#7898b0 70%,#486880 100%); }
+.hf-social  { background: linear-gradient(180deg,#e8e0d8 0%,#d8c8b8 40%,#c0a890 70%,#a08870 100%); }
+.hf-wellness{ background: linear-gradient(180deg,#c8e0e8 0%,#a8c8d8 40%,#88b0c0 70%,#608090 100%); }
+
+.hero-fade {
+  position: absolute; inset: 0;
+  background: linear-gradient(to bottom,rgba(247,245,240,0) 0%,rgba(247,245,240,0) 44%,rgba(247,245,240,.5) 68%,rgba(247,245,240,1) 100%);
+}
+.hero-bar {
+  position: absolute; top: 0; left: 0; right: 0;
+  display: flex; justify-content: space-between; align-items: center;
+  padding: 46px 20px 10px; z-index: 5;
+}
+.hero-logo { font-family:'Lora',serif; font-style:italic; font-size:22px; color:rgba(255,255,255,.95); text-shadow:0 1px 10px rgba(0,0,0,.22); }
+.hero-right { display:flex; align-items:center; gap:10px; }
+.hero-date { font-size:11px; color:rgba(255,255,255,.7); letter-spacing:.5px; }
+.signout-btn {
+  font-size:10px; color:rgba(255,255,255,.65); background:rgba(255,255,255,.15);
+  border:none; border-radius:8px; padding:4px 9px; cursor:pointer;
+  font-family:'DM Sans',sans-serif; letter-spacing:.3px; backdrop-filter:blur(8px);
+}
+
+.today-body { flex:1; overflow-y:auto; padding:12px 20px 100px; -webkit-overflow-scrolling:touch; }
+.today-body::-webkit-scrollbar { display:none; }
+
+.ctag {
+  display:flex; align-items:center; gap:6px;
+  font-size:9px; letter-spacing:2px; text-transform:uppercase;
+  color:var(--accent); margin-bottom:7px; font-weight:500;
+}
+.ctag-dot { width:6px; height:6px; border-radius:50%; flex-shrink:0; }
+
+.ctitle { font-family:'Lora',serif; font-size:21px; font-style:italic; color:var(--ink); line-height:1.35; margin-bottom:7px; }
+.cdesc { font-size:13px; color:var(--ink3); line-height:1.65; margin-bottom:18px; font-weight:300; }
+
+.cactions { display:flex; gap:10px; margin-bottom:26px; }
+.btn-done {
+  flex:1; background:var(--ink); color:var(--bg); border:none; border-radius:14px;
+  padding:14px 18px; font-family:'DM Sans',sans-serif; font-size:14px; font-weight:500;
+  cursor:pointer; transition:all .18s; letter-spacing:.2px;
+}
+.btn-done:active { transform:scale(.97); opacity:.85; }
+.btn-done.done { background:var(--accent); }
+.btn-skip {
+  width:50px; background:var(--white); border:1px solid var(--ink4);
+  border-radius:14px; font-size:17px; cursor:pointer;
+  display:flex; align-items:center; justify-content:center; flex-shrink:0; transition:all .18s;
+}
+.btn-skip:active { transform:scale(.95); }
+
+.divider { border:none; border-top:1px solid var(--ink4); margin-bottom:16px; }
+.sec-label { font-size:9px; letter-spacing:2px; text-transform:uppercase; color:var(--ink4); margin-bottom:11px; font-weight:500; }
+
+.list-pills { display:flex; gap:8px; flex-wrap:wrap; }
+.lpill {
+  display:flex; align-items:center; gap:7px; background:var(--white);
+  border:1px solid var(--ink4); border-radius:20px; padding:7px 13px;
+  font-size:12px; color:var(--ink2); cursor:pointer;
+}
+.lpill-dot { width:6px; height:6px; border-radius:50%; flex-shrink:0; }
+.pills-empty { font-size:13px; color:var(--ink3); font-style:italic; font-weight:300; }
+
+/* ── MY LIST ── */
+.lheader { padding:50px 20px 14px; border-bottom:1px solid var(--ink4); flex-shrink:0; background:var(--bg); }
+.lheader-top { display:flex; justify-content:space-between; align-items:baseline; margin-bottom:13px; }
+.lheader-top h2 { font-family:'Lora',serif; font-size:21px; font-style:italic; font-weight:400; color:var(--ink); }
+.lcount { font-size:12px; color:var(--ink3); background:var(--white); border:1px solid var(--ink4); padding:3px 10px; border-radius:20px; }
+
+.add-bar {
+  display:flex; align-items:center; gap:10px; background:var(--white);
+  border:1px solid var(--ink4); border-radius:14px; padding:10px 12px; box-shadow:var(--shadow);
+}
+.add-inp {
+  flex:1; background:none; border:none; outline:none;
+  font-family:'DM Sans',sans-serif; font-size:14px; color:var(--ink); font-weight:300;
+}
+.add-inp::placeholder { color:var(--ink4); }
+.add-go {
+  background:var(--ink); color:var(--bg); border:none; border-radius:10px;
+  padding:7px 14px; font-family:'DM Sans',sans-serif; font-size:12px; font-weight:500;
+  cursor:pointer; white-space:nowrap; flex-shrink:0; transition:all .18s;
+}
+.add-go:active { transform:scale(.96); }
+
+.cat-bar { display:flex; gap:6px; flex-wrap:wrap; padding:11px 20px; background:var(--bg); border-bottom:1px solid var(--ink4); flex-shrink:0; }
+.cchip {
+  padding:5px 12px; border-radius:20px; border:1px solid var(--ink4); background:var(--white);
+  font-size:11px; color:var(--ink2); cursor:pointer; font-family:'DM Sans',sans-serif;
+  display:flex; align-items:center; gap:5px; transition:all .18s;
+}
+.cchip.on { background:var(--ink); color:var(--bg); border-color:var(--ink); }
+
+.lscroll { flex:1; overflow-y:auto; padding:13px 20px 100px; -webkit-overflow-scrolling:touch; }
+.lscroll::-webkit-scrollbar { display:none; }
+
+.lsec { font-size:9px; letter-spacing:2px; text-transform:uppercase; color:var(--ink4); margin-bottom:9px; font-weight:500; }
+
+.bitem {
+  display:flex; align-items:center; gap:13px; background:var(--white);
+  border-radius:var(--radius); padding:12px 14px; margin-bottom:8px;
+  box-shadow:var(--shadow); cursor:pointer; transition:all .2s;
+  animation:si .25s ease;
+}
+@keyframes si { from{opacity:0;transform:translateY(-8px)} to{opacity:1;transform:translateY(0)} }
+.bitem:active { transform:scale(.98); }
+.bitem.done { opacity:.38; box-shadow:none; }
+.bitem.done .ititle { text-decoration:line-through; }
+
+.iimg-wrap { width:46px; height:46px; border-radius:12px; overflow:hidden; flex-shrink:0; background:var(--ink4); position:relative; }
+.iimg { width:100%; height:100%; object-fit:cover; display:block; transition:opacity .4s; }
+.iimg.dim { opacity:0; }
+.iimg-fallback { position:absolute; inset:0; display:flex; align-items:center; justify-content:center; font-size:20px; }
+
+.iinfo { flex:1; overflow:hidden; }
+.ititle { font-size:14px; font-weight:400; color:var(--ink); margin-bottom:3px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.imeta { display:flex; align-items:center; gap:5px; font-size:11px; color:var(--ink3); }
+.icat-dot { width:5px; height:5px; border-radius:50%; flex-shrink:0; }
+
+.icheck {
+  width:24px; height:24px; border-radius:50%; border:1.5px solid var(--ink4);
+  display:flex; align-items:center; justify-content:center;
+  flex-shrink:0; font-size:11px; color:transparent; transition:all .2s;
+}
+.bitem.done .icheck { background:var(--accent); border-color:var(--accent); color:#fff; }
+
+.lempty { text-align:center; padding:60px 20px; color:var(--ink3); }
+.lempty .ei { font-size:40px; margin-bottom:14px; }
+.lempty p { font-size:14px; line-height:1.6; font-weight:300; font-style:italic; font-family:'Lora',serif; }
+
+/* ── MODAL ── */
+.modal-bg {
+  position:fixed; inset:0; background:rgba(28,28,26,0);
+  z-index:500; display:flex; align-items:flex-end; justify-content:center;
+  pointer-events:none; transition:background .3s ease;
+}
+.modal-bg.on { background:rgba(28,28,26,.48); pointer-events:all; }
+
+.modal-sheet {
+  width:100%; max-width:430px; background:var(--white);
+  border-radius:26px 26px 0 0;
+  padding:0 22px max(28px,env(safe-area-inset-bottom));
+  box-shadow:0 -8px 48px rgba(0,0,0,.18);
+  transform:translateY(100%);
+  transition:transform .35s cubic-bezier(.32,.72,0,1);
+}
+.modal-bg.on .modal-sheet { transform:translateY(0); }
+
+.mhandle { width:36px; height:4px; background:var(--ink4); border-radius:2px; margin:14px auto 20px; }
+
+.mpreview {
+  display:flex; align-items:center; gap:13px; background:var(--bg);
+  border-radius:14px; padding:12px 14px; margin-bottom:20px;
+}
+.mimg {
+  width:44px; height:44px; border-radius:11px; overflow:hidden;
+  flex-shrink:0; background:var(--ink4); position:relative;
+}
+.mimg img { width:100%; height:100%; object-fit:cover; display:block; }
+.mimg .mfe { position:absolute; inset:0; display:flex; align-items:center; justify-content:center; font-size:20px; }
+
+.mtitle { font-size:15px; font-weight:400; color:var(--ink); margin-bottom:3px; }
+.mcat { display:flex; align-items:center; gap:5px; font-size:11px; color:var(--ink3); }
+.mcat-dot { width:5px; height:5px; border-radius:50%; flex-shrink:0; }
+
+.mq { font-family:'Lora',serif; font-size:18px; font-style:italic; color:var(--ink); margin-bottom:3px; }
+.msub { font-size:12px; color:var(--ink3); margin-bottom:16px; font-weight:300; }
+
+.stars { display:flex; gap:8px; margin-bottom:16px; }
+.star {
+  font-size:32px; background:none; border:none; cursor:pointer;
+  color:var(--ink4); transition:all .15s; padding:0; line-height:1;
+}
+.star.lit { color:#e8b84b; }
+.star:active { transform:scale(1.22); }
+
+.mnote {
+  width:100%; background:var(--bg); border:1px solid var(--ink4);
+  border-radius:14px; padding:13px 14px;
+  font-family:'DM Sans',sans-serif; font-size:13px; color:var(--ink);
+  resize:none; height:76px; outline:none; margin-bottom:14px;
+  font-weight:300; line-height:1.6; transition:border-color .2s;
+}
+.mnote::placeholder { color:var(--ink4); font-style:italic; }
+.mnote:focus { border-color:var(--ink3); }
+
+.mactions { display:flex; gap:10px; }
+.msave {
+  flex:1; background:var(--ink); color:var(--bg); border:none;
+  border-radius:14px; padding:14px; font-family:'DM Sans',sans-serif;
+  font-size:14px; font-weight:500; cursor:pointer; transition:all .18s;
+}
+.msave:active { transform:scale(.97); }
+.mskip {
+  background:var(--bg); color:var(--ink3); border:1px solid var(--ink4);
+  border-radius:14px; padding:14px 18px; font-family:'DM Sans',sans-serif;
+  font-size:14px; cursor:pointer;
+}
+
+/* ── TOAST ── */
+.toast {
+  position:fixed; top:58px; left:50%;
+  transform:translateX(-50%) translateY(-18px);
+  background:var(--ink); color:var(--bg);
+  padding:10px 20px; border-radius:20px;
+  font-size:13px; z-index:1000; opacity:0;
+  transition:all .25s ease; white-space:nowrap; pointer-events:none;
+}
+.toast.show { opacity:1; transform:translateX(-50%) translateY(0); }
 </style>
 </head>
 <body>
 
-<div class="app">
+<!-- LOADING -->
+<div id="loading"><div class="loading-logo">Thrive</div></div>
 
-  <!-- ══════════════════════════════════
-       PAGE: TODAY
-  ══════════════════════════════════ -->
-  <div class="page active" id="page-today">
-
-    <div class="hero-wrap" id="heroWrap">
-      <div class="hero-fallback nature" id="heroFallback"></div>
-      <img class="hero-img loading" id="heroImg" alt="Challenge scene" />
-      <div class="hero-overlay"></div>
-      <div class="hero-top-bar">
-        <div class="hero-logo">Thrive</div>
-        <div class="hero-date" id="heroDate"></div>
-      </div>
-    </div>
-
-    <div class="today-body">
-      <div class="challenge-tag">
-        <div class="tag-dot" id="challengeTagDot"></div>
-        <span id="challengeTagLabel">Daily Challenge</span>
-      </div>
-
-      <div class="challenge-title" id="challengeTitle">Loading today's challenge…</div>
-      <div class="challenge-desc" id="challengeDesc"></div>
-
-      <div class="challenge-actions">
-        <button class="btn-done" id="btnDone" onclick="handleChallengeComplete()">I did this ✓</button>
-        <button class="btn-skip" id="btnSkip" onclick="skipChallenge()" title="Try a different challenge">↻</button>
-      </div>
-
-      <hr class="divider">
-      <div class="section-label">On your list</div>
-      <div class="list-pills" id="todayPills"></div>
-    </div>
-
+<!-- AUTH -->
+<div id="auth">
+  <div class="auth-hero">
+    <div class="auth-hero-fade"></div>
+    <div class="auth-logo-big">Thrive</div>
   </div>
-
-  <!-- ══════════════════════════════════
-       PAGE: MY LIST
-  ══════════════════════════════════ -->
-  <div class="page" id="page-list">
-
-    <div class="list-header">
-      <div class="list-header-top">
-        <h2>My List</h2>
-        <div class="item-count" id="itemCount">0 to try</div>
-      </div>
-      <div class="add-bar">
-        <input
-          class="add-input"
-          id="addInput"
-          type="text"
-          placeholder="Add something to try…"
-          maxlength="80"
-          onkeydown="if(event.key==='Enter') addItem()"
-        />
-        <button class="add-input-btn" onclick="addItem()">Add</button>
-      </div>
+  <div class="auth-body">
+    <div class="auth-tagline">Discover what you truly enjoy.</div>
+    <div class="auth-sub">Daily challenges, a personal bucket list, and a space to reflect on what lights you up.</div>
+    <div class="auth-tabs">
+      <button class="auth-tab on" onclick="switchTab('in')">Sign in</button>
+      <button class="auth-tab" onclick="switchTab('up')">Create account</button>
     </div>
 
-    <!-- Category picker -->
-    <div class="cat-picker" id="catPicker"></div>
+    <form class="auth-form" id="fIn" onsubmit="doLogin(event)">
+      <div><label class="field-label">Email</label><input class="auth-input" id="inEmail" type="email" placeholder="you@example.com" required autocomplete="email"></div>
+      <div><label class="field-label">Password</label><input class="auth-input" id="inPw" type="password" placeholder="Your password" required autocomplete="current-password"></div>
+      <div class="auth-msg err" id="inErr"></div>
+      <button class="auth-btn" id="inBtn" type="submit">Sign in</button>
+    </form>
 
-    <div class="list-scroll" id="listScroll">
-      <div class="empty-list" id="emptyList">
-        <div class="empty-icon">🗺️</div>
-        <p>Your list is empty.<br>Add the first thing you want to try.</p>
-      </div>
-      <div id="listItems"></div>
-    </div>
-
+    <form class="auth-form hide" id="fUp" onsubmit="doSignup(event)">
+      <div><label class="field-label">Email</label><input class="auth-input" id="upEmail" type="email" placeholder="you@example.com" required autocomplete="email"></div>
+      <div><label class="field-label">Password</label><input class="auth-input" id="upPw" type="password" placeholder="At least 6 characters" required minlength="6" autocomplete="new-password"></div>
+      <div class="auth-msg" id="upMsg"></div>
+      <button class="auth-btn" id="upBtn" type="submit">Create account</button>
+    </form>
   </div>
-
 </div>
 
-<!-- ══════════════════════════════════
-     BOTTOM NAV
-══════════════════════════════════ -->
-<nav class="bottom-nav">
-  <button class="nav-btn active" id="nav-today" onclick="showPage('today')">
-    <span class="nav-icon">◎</span>
-    <span class="nav-label">Today</span>
-  </button>
-  <button class="nav-btn" id="nav-list" onclick="showPage('list')">
-    <span class="nav-icon">≡</span>
-    <span class="nav-label">My List</span>
-  </button>
-</nav>
+<!-- APP -->
+<div class="app">
 
-<!-- ══════════════════════════════════
-     REFLECTION MODAL
-══════════════════════════════════ -->
-<div class="modal-overlay" id="modalOverlay" onclick="handleOverlayClick(event)">
-  <div class="modal-sheet" id="modalSheet">
-    <div class="modal-handle"></div>
-
-    <div class="modal-item-preview">
-      <div class="modal-item-img" id="modalItemImg">
-        <div class="fallback-emoji" id="modalFallbackEmoji"></div>
-        <img id="modalImg" style="display:none;width:100%;height:100%;object-fit:cover" alt="">
-      </div>
-      <div>
-        <div class="modal-item-title" id="modalTitle"></div>
-        <div class="modal-item-cat">
-          <div class="item-cat-dot" id="modalCatDot"></div>
-          <span id="modalCatLabel"></span>
+  <!-- TODAY -->
+  <div class="page on" id="page-today">
+    <div class="hero-wrap">
+      <div class="hero-fallback hf-nature" id="hFallback"></div>
+      <img class="hero-photo dim" id="hPhoto" alt="">
+      <div class="hero-fade"></div>
+      <div class="hero-bar">
+        <div class="hero-logo">Thrive</div>
+        <div class="hero-right">
+          <span class="hero-date" id="hDate"></span>
+          <button class="signout-btn" onclick="doSignout()">Sign out</button>
         </div>
       </div>
     </div>
-
-    <div class="modal-q">How was it?</div>
-    <div class="modal-sub">Be honest — this is just for you.</div>
-
-    <div class="star-row" id="starRow">
-      <button class="star-btn" data-v="1" onclick="setStar(1)">★</button>
-      <button class="star-btn" data-v="2" onclick="setStar(2)">★</button>
-      <button class="star-btn" data-v="3" onclick="setStar(3)">★</button>
-      <button class="star-btn" data-v="4" onclick="setStar(4)">★</button>
-      <button class="star-btn" data-v="5" onclick="setStar(5)">★</button>
+    <div class="today-body">
+      <div class="ctag"><div class="ctag-dot" id="cDot"></div><span id="cTag">Daily Challenge</span></div>
+      <div class="ctitle" id="cTitle">Loading…</div>
+      <div class="cdesc" id="cDesc"></div>
+      <div class="cactions">
+        <button class="btn-done" id="btnDone" onclick="completeChallenge()">I did this ✓</button>
+        <button class="btn-skip" onclick="skipChallenge()">↻</button>
+      </div>
+      <hr class="divider">
+      <div class="sec-label">On your list</div>
+      <div class="list-pills" id="todayPills"></div>
     </div>
+  </div>
 
-    <textarea
-      class="note-area"
-      id="noteArea"
-      placeholder="What did you discover? How did it feel…"
-    ></textarea>
+  <!-- MY LIST -->
+  <div class="page" id="page-list">
+    <div class="lheader">
+      <div class="lheader-top">
+        <h2>My List</h2>
+        <div class="lcount" id="lCount">0 to try</div>
+      </div>
+      <div class="add-bar">
+        <input class="add-inp" id="addInp" type="text" placeholder="Add something to try…" maxlength="80" onkeydown="if(event.key==='Enter')addItem()">
+        <button class="add-go" onclick="addItem()">Add</button>
+      </div>
+    </div>
+    <div class="cat-bar" id="catBar"></div>
+    <div class="lscroll">
+      <div class="lempty" id="lEmpty"><div class="ei">🗺️</div><p>Your list is empty.<br>Add the first thing you want to try.</p></div>
+      <div id="lItems"></div>
+    </div>
+  </div>
 
-    <div class="modal-actions">
-      <button class="btn-save" onclick="saveReflection()">Save reflection</button>
-      <button class="btn-modal-skip" onclick="skipReflection()">Skip</button>
+</div>
+
+<!-- NAV -->
+<nav class="bottom-nav">
+  <button class="nav-btn on" id="nav-today" onclick="showPage('today')">
+    <span class="ni">◎</span><span class="nl">Today</span>
+  </button>
+  <button class="nav-btn" id="nav-list" onclick="showPage('list')">
+    <span class="ni">≡</span><span class="nl">My List</span>
+  </button>
+</nav>
+
+<!-- MODAL -->
+<div class="modal-bg" id="modalBg" onclick="bgClick(event)">
+  <div class="modal-sheet">
+    <div class="mhandle"></div>
+    <div class="mpreview">
+      <div class="mimg" id="mImg"><div class="mfe" id="mFe"></div><img id="mPhoto" style="display:none;width:100%;height:100%;object-fit:cover" alt=""></div>
+      <div>
+        <div class="mtitle" id="mTitle"></div>
+        <div class="mcat"><div class="mcat-dot" id="mDot"></div><span id="mCat"></span></div>
+      </div>
+    </div>
+    <div class="mq">How was it?</div>
+    <div class="msub">Be honest — this is just for you.</div>
+    <div class="stars">
+      <button class="star" onclick="setStar(1)">★</button>
+      <button class="star" onclick="setStar(2)">★</button>
+      <button class="star" onclick="setStar(3)">★</button>
+      <button class="star" onclick="setStar(4)">★</button>
+      <button class="star" onclick="setStar(5)">★</button>
+    </div>
+    <textarea class="mnote" id="mNote" placeholder="What did you discover? How did it feel…"></textarea>
+    <div class="mactions">
+      <button class="msave" onclick="saveRef()">Save reflection</button>
+      <button class="mskip" onclick="closeModal()">Skip</button>
     </div>
   </div>
 </div>
 
-<!-- TOAST -->
 <div class="toast" id="toast"></div>
 
 <script>
-// ═══════════════════════════════════════════════
-// CONFIG
-// ═══════════════════════════════════════════════
-const UNSPLASH_KEY = '6TS9FphLnaJGEhcHqdDbG7WvQ55RbNKIEunJ8x4-xhQ';
+// ─── SUPABASE ────────────────────────────────
+const { createClient } = supabase;
+const sb = createClient(
+  'https://peqgoudpwwmanbcjdgsw.supabase.co',
+  'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBlcWdvdWRwd3dtYW5iY2pkZ3N3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzIyNTAzNTksImV4cCI6MjA4NzgyNjM1OX0.BRswh8-WzrJ_7FRG3Q-V2qPHjcQkJG6EWnWLoMRlSIc'
+);
 
-const CATEGORIES = [
-  { id: 'nature',   label: 'Nature',   emoji: '🌿', color: '#7da87d', query: 'forest nature morning light path' },
-  { id: 'arts',     label: 'Arts',     emoji: '🎨', color: '#c97070', query: 'pottery clay art studio creative' },
-  { id: 'food',     label: 'Food',     emoji: '🍜', color: '#d4956a', query: 'food market cooking fresh ingredients' },
-  { id: 'fitness',  label: 'Fitness',  emoji: '🏃', color: '#7db8a4', query: 'rock climbing hiking adventure movement' },
-  { id: 'social',   label: 'Social',   emoji: '🤝', color: '#9b8fc4', query: 'people community cafe gathering friends' },
-  { id: 'wellness', label: 'Wellness', emoji: '🧘', color: '#e8c87d', query: 'calm ocean sunrise wellness meditation' },
+// ─── CONFIG ──────────────────────────────────
+const UNSPLASH = '6TS9FphLnaJGEhcHqdDbG7WvQ55RbNKIEunJ8x4-xhQ';
+
+const CATS = [
+  { id:'nature',  label:'Nature',  emoji:'🌿', color:'#7da87d', q:'forest nature morning light path' },
+  { id:'arts',    label:'Arts',    emoji:'🎨', color:'#c97070', q:'pottery clay art studio creative' },
+  { id:'food',    label:'Food',    emoji:'🍜', color:'#d4956a', q:'food market cooking fresh ingredients' },
+  { id:'fitness', label:'Fitness', emoji:'🏃', color:'#7db8a4', q:'rock climbing hiking adventure movement' },
+  { id:'social',  label:'Social',  emoji:'🤝', color:'#9b8fc4', q:'people community gathering cafe friends' },
+  { id:'wellness',label:'Wellness',emoji:'🧘', color:'#e8c87d', q:'calm ocean sunrise wellness meditation' },
 ];
 
 const CHALLENGES = [
-  { title: 'Sit in nature for 20 quiet minutes', desc: 'No music, no podcast. Just you, your senses, and whatever is living around you. Notice what you hear first.', cat: 'nature' },
-  { title: 'Cook a cuisine you have never tried before', desc: 'Pick a country. Find one traditional recipe. Buy the ingredients today. The process matters more than perfection.', cat: 'food' },
-  { title: 'Go somewhere completely unfamiliar', desc: 'A neighbourhood, a road, a building you always pass but never enter. Let curiosity lead for at least 30 minutes.', cat: 'nature' },
-  { title: 'Create something with your hands today', desc: 'Sketch, sculpt, bake, build — make something physical that did not exist this morning. It does not need to be good.', cat: 'arts' },
-  { title: 'Have one genuinely deep conversation', desc: 'Ask someone what has really been on their mind lately. Then actually listen. No advice needed — just presence.', cat: 'social' },
-  { title: 'Move your body in a way that feels like play', desc: 'Not exercise. Play. Sprint, climb something, dance alone in your kitchen. Move like you did as a child would.', cat: 'fitness' },
-  { title: 'Spend one hour completely phone-free', desc: 'From right now. No checking, no glancing. See what fills the space. Notice what you reach for out of habit.', cat: 'wellness' },
-  { title: 'Do one thing that scares you a little', desc: 'Not dangerous — just outside your comfort zone. The size of the action does not matter. Doing it does.', cat: 'wellness' },
+  { title:'Sit in nature for 20 quiet minutes', desc:'No music, no podcast. Just you, your senses, and whatever is living around you. Notice what you hear first.', cat:'nature' },
+  { title:'Cook a cuisine you have never tried before', desc:'Pick a country. Find one traditional recipe. Buy the ingredients today. The process matters more than perfection.', cat:'food' },
+  { title:'Go somewhere completely unfamiliar', desc:'A neighbourhood, a road, a building you always pass but never enter. Let curiosity lead for at least 30 minutes.', cat:'nature' },
+  { title:'Create something with your hands today', desc:'Sketch, sculpt, bake, build — make something physical that did not exist this morning. It does not need to be good.', cat:'arts' },
+  { title:'Have one genuinely deep conversation', desc:'Ask someone what has really been on their mind lately. Then actually listen. No advice needed — just presence.', cat:'social' },
+  { title:'Move your body in a way that feels like play', desc:'Not exercise. Play. Sprint, climb something, dance in your kitchen. Move like you did as a child.', cat:'fitness' },
+  { title:'Spend one hour completely phone-free', desc:'From right now. No checking, no glancing. See what fills the space. Notice what you reach for out of habit.', cat:'wellness' },
+  { title:'Do one thing that scares you a little', desc:'Not dangerous — just outside your comfort zone. The size of the action does not matter. Doing it does.', cat:'wellness' },
 ];
 
-// ═══════════════════════════════════════════════
-// STATE
-// ═══════════════════════════════════════════════
-let state = {
-  items: [],
-  reflections: [],
-  challengeIndex: 0,
-  challengeDate: '',
-  challengeDone: false,
-  selectedCat: 'nature',
-  photoCache: {},
-};
+// ─── STATE ───────────────────────────────────
+let user = null;
+let items = [];
+let photos = {};
+let selCat = 'nature';
+let cIdx = 0, cDate = '', cDone = false;
+let modalId = null, modalRating = 0;
 
-// Modal state
-let modalItemId = null;
-let modalRating = 0;
-let modalIsChallenge = false;
-
-// ═══════════════════════════════════════════════
-// PERSISTENCE
-// ═══════════════════════════════════════════════
-function saveState() {
-  try { localStorage.setItem('thrive_v1', JSON.stringify(state)); } catch(e) {}
+// ─── LOCAL CACHE (photos + challenge only) ───
+function loadCache() {
+  try { const c = JSON.parse(localStorage.getItem('thrive_c')||'{}'); photos=c.photos||{}; cIdx=c.cIdx||0; cDate=c.cDate||''; cDone=c.cDone||false; } catch(e){}
+}
+function saveCache() {
+  try { localStorage.setItem('thrive_c', JSON.stringify({photos,cIdx,cDate,cDone})); } catch(e){}
 }
 
-function loadState() {
+// ─── AUTH HELPERS ────────────────────────────
+function switchTab(t) {
+  document.querySelectorAll('.auth-tab').forEach((el,i)=>el.classList.toggle('on',(i===0&&t==='in')||(i===1&&t==='up')));
+  document.getElementById('fIn').classList.toggle('hide', t!=='in');
+  document.getElementById('fUp').classList.toggle('hide', t!=='up');
+}
+
+async function doLogin(e) {
+  e.preventDefault();
+  const btn=document.getElementById('inBtn'), err=document.getElementById('inErr');
+  btn.disabled=true; btn.textContent='Signing in…'; err.classList.remove('show');
+  const {error} = await sb.auth.signInWithPassword({email:document.getElementById('inEmail').value.trim(), password:document.getElementById('inPw').value});
+  if(error){err.textContent=error.message;err.classList.add('show');btn.disabled=false;btn.textContent='Sign in';}
+}
+
+async function doSignup(e) {
+  e.preventDefault();
+  const btn=document.getElementById('upBtn'), msg=document.getElementById('upMsg');
+  btn.disabled=true; btn.textContent='Creating account…'; msg.classList.remove('show');
+  const {error} = await sb.auth.signUp({email:document.getElementById('upEmail').value.trim(), password:document.getElementById('upPw').value});
+  msg.classList.add('show');
+  if(error){msg.className='auth-msg err show';msg.textContent=error.message;btn.disabled=false;btn.textContent='Create account';}
+  else{msg.className='auth-msg ok show';msg.textContent='Account created! Check your email to confirm, then sign in.';btn.disabled=false;btn.textContent='Create account';}
+}
+
+async function doSignout() { await sb.auth.signOut(); }
+
+// ─── AUTH STATE ──────────────────────────────
+sb.auth.onAuthStateChange(async(_,session)=>{
+  if(session?.user){
+    user=session.user;
+    document.getElementById('auth').classList.add('gone');
+    await loadItems();
+    initChallenge();
+    renderCatBar();
+    hideLoading();
+  } else {
+    user=null; items=[];
+    document.getElementById('auth').classList.remove('gone');
+    hideLoading();
+  }
+});
+
+// ─── DB ──────────────────────────────────────
+async function loadItems() {
+  const {data,error} = await sb.from('items').select('*').eq('user_id',user.id).order('added_at',{ascending:false});
+  if(!error&&data) items=data;
+}
+
+async function dbInsert(item) {
+  const {data,error} = await sb.from('items').insert({user_id:user.id,...item}).select().single();
+  return error?null:data;
+}
+
+async function dbUpdate(id,patch) {
+  await sb.from('items').update(patch).eq('id',id).eq('user_id',user.id);
+}
+
+async function dbReflection(itemId,rating,note) {
+  await sb.from('reflections').delete().eq('item_id',itemId).eq('user_id',user.id);
+  await sb.from('reflections').insert({user_id:user.id,item_id:itemId,rating,note});
+}
+
+// ─── UNSPLASH ────────────────────────────────
+async function getPhoto(catId) {
+  if(photos[catId]) return photos[catId];
+  const cat=CATS.find(c=>c.id===catId); if(!cat) return null;
   try {
-    const saved = localStorage.getItem('thrive_v1');
-    if (saved) state = { ...state, ...JSON.parse(saved) };
-  } catch(e) {}
+    const r=await fetch(`https://api.unsplash.com/photos/random?query=${encodeURIComponent(cat.q)}&orientation=landscape&client_id=${UNSPLASH}`);
+    if(!r.ok) return null;
+    const d=await r.json();
+    const url=d?.urls?.regular||d?.urls?.small;
+    if(url){photos[catId]=url;saveCache();}
+    return url||null;
+  } catch(e){return null;}
 }
 
-// ═══════════════════════════════════════════════
-// UNSPLASH
-// ═══════════════════════════════════════════════
-async function fetchPhoto(catId) {
-  if (state.photoCache[catId]) return state.photoCache[catId];
-  const cat = CATEGORIES.find(c => c.id === catId);
-  if (!cat) return null;
-  try {
-    const res = await fetch(
-      `https://api.unsplash.com/photos/random?query=${encodeURIComponent(cat.query)}&orientation=landscape&client_id=${UNSPLASH_KEY}`
-    );
-    if (!res.ok) return null;
-    const data = await res.json();
-    const url = data?.urls?.regular || data?.urls?.small;
-    if (url) {
-      state.photoCache[catId] = url;
-      saveState();
-    }
-    return url || null;
-  } catch(e) { return null; }
-}
-
-// ═══════════════════════════════════════════════
-// PAGE NAVIGATION
-// ═══════════════════════════════════════════════
+// ─── NAV ─────────────────────────────────────
 function showPage(name) {
-  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-  document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
-  document.getElementById('page-' + name).classList.add('active');
-  document.getElementById('nav-' + name).classList.add('active');
-  if (name === 'list') renderList();
-  if (name === 'today') renderTodayPills();
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('on'));
+  document.querySelectorAll('.nav-btn').forEach(b=>b.classList.remove('on'));
+  document.getElementById('page-'+name).classList.add('on');
+  document.getElementById('nav-'+name).classList.add('on');
+  if(name==='list') renderList();
+  if(name==='today') renderPills();
 }
 
-// ═══════════════════════════════════════════════
-// TODAY SCREEN
-// ═══════════════════════════════════════════════
-function getToday() {
-  return new Date().toISOString().slice(0, 10);
-}
+// ─── TODAY ───────────────────────────────────
+function today() { return new Date().toISOString().slice(0,10); }
 
 function initChallenge() {
-  const today = getToday();
-  if (state.challengeDate !== today) {
-    state.challengeDate = today;
-    state.challengeIndex = (state.challengeIndex + 1) % CHALLENGES.length;
-    state.challengeDone = false;
-    saveState();
-  }
+  const t=today();
+  if(cDate!==t){cDate=t;cIdx=(cIdx+1)%CHALLENGES.length;cDone=false;saveCache();}
   renderChallenge();
 }
 
 function renderChallenge() {
-  const c = CHALLENGES[state.challengeIndex % CHALLENGES.length];
-  const cat = CATEGORIES.find(x => x.id === c.cat);
-
-  document.getElementById('challengeTitle').textContent = c.title;
-  document.getElementById('challengeDesc').textContent = c.desc;
-  document.getElementById('challengeTagLabel').textContent = `Daily Challenge · ${cat.label}`;
-  document.getElementById('challengeTagDot').style.background = cat.color;
-
-  // Hero date
-  const now = new Date();
-  document.getElementById('heroDate').textContent = now.toLocaleDateString('en-GB', { weekday: 'short', day: 'numeric', month: 'short' });
-
-  // Hero fallback class
-  const fallback = document.getElementById('heroFallback');
-  fallback.className = `hero-fallback ${c.cat}`;
-
-  // Done state
-  const btn = document.getElementById('btnDone');
-  if (state.challengeDone) {
-    btn.textContent = '✓ Done for today';
-    btn.classList.add('completed');
-    btn.disabled = true;
-    btn.style.opacity = '0.7';
-  } else {
-    btn.textContent = 'I did this ✓';
-    btn.classList.remove('completed');
-    btn.disabled = false;
-    btn.style.opacity = '';
-  }
-
-  // Load hero photo
+  const c=CHALLENGES[cIdx%CHALLENGES.length];
+  const cat=CATS.find(x=>x.id===c.cat);
+  document.getElementById('cTitle').textContent=c.title;
+  document.getElementById('cDesc').textContent=c.desc;
+  document.getElementById('cTag').textContent=`Daily Challenge · ${cat.label}`;
+  document.getElementById('cDot').style.background=cat.color;
+  document.getElementById('hDate').textContent=new Date().toLocaleDateString('en-GB',{weekday:'short',day:'numeric',month:'short'});
+  document.getElementById('hFallback').className=`hero-fallback hf-${c.cat}`;
+  const btn=document.getElementById('btnDone');
+  if(cDone){btn.textContent='✓ Done for today';btn.classList.add('done');btn.disabled=true;btn.style.opacity='.65';}
+  else{btn.textContent='I did this ✓';btn.classList.remove('done');btn.disabled=false;btn.style.opacity='';}
   loadHeroPhoto(c.cat);
-  renderTodayPills();
+  renderPills();
 }
 
 async function loadHeroPhoto(catId) {
-  const img = document.getElementById('heroImg');
-  img.classList.add('loading');
-  const url = await fetchPhoto(catId);
-  if (url) {
-    img.src = url;
-    img.onload = () => img.classList.remove('loading');
-  }
+  const img=document.getElementById('hPhoto');
+  img.classList.add('dim');
+  const url=await getPhoto(catId);
+  if(url){img.src=url;img.onload=()=>img.classList.remove('dim');}
 }
 
 function skipChallenge() {
-  if (state.challengeDone) { showToast('Already completed today — try another day!'); return; }
-  state.challengeIndex = (state.challengeIndex + 1) % CHALLENGES.length;
-  saveState();
-  renderChallenge();
-  showToast('New challenge loaded');
+  if(cDone){toast('Already done today!');return;}
+  cIdx=(cIdx+1)%CHALLENGES.length;saveCache();renderChallenge();toast('New challenge loaded');
 }
 
-function handleChallengeComplete() {
-  if (state.challengeDone) return;
-  const c = CHALLENGES[state.challengeIndex % CHALLENGES.length];
-  // Add to items if not already there
-  const exists = state.items.find(i => i.isChallenge && i.challengeIndex === state.challengeIndex);
-  if (!exists) {
-    const id = Date.now();
-    state.items.unshift({
-      id,
-      title: c.title,
-      cat: c.cat,
-      done: true,
-      isChallenge: true,
-      challengeIndex: state.challengeIndex,
-      addedAt: Date.now(),
-    });
-    saveState();
-    openModal(id, true);
-  } else {
-    openModal(exists.id, true);
-  }
+async function completeChallenge() {
+  if(cDone) return;
+  const c=CHALLENGES[cIdx%CHALLENGES.length];
+  const exists=items.find(i=>i.is_challenge&&i.challenge_index===cIdx);
+  if(exists){openModal(exists.id);return;}
+  const saved=await dbInsert({title:c.title,cat:c.cat,done:true,is_challenge:true,challenge_index:cIdx});
+  if(saved){items.unshift(saved);cDone=true;saveCache();renderChallenge();openModal(saved.id);}
 }
 
-function renderTodayPills() {
-  const container = document.getElementById('todayPills');
-  const pending = state.items.filter(i => !i.done && !i.isChallenge);
-  if (pending.length === 0) {
-    container.innerHTML = `<div class="empty-pills">Nothing on your list yet — add something to try.</div>`;
-    return;
-  }
-  container.innerHTML = pending.slice(0, 4).map(item => {
-    const cat = CATEGORIES.find(c => c.id === item.cat);
-    return `<div class="list-pill" onclick="showPage('list')">
-      <div class="pill-dot" style="background:${cat ? cat.color : '#aaa'}"></div>
-      ${item.title}
-    </div>`;
+function renderPills() {
+  const el=document.getElementById('todayPills');
+  const pending=items.filter(i=>!i.done&&!i.is_challenge);
+  if(!pending.length){el.innerHTML='<div class="pills-empty">Nothing on your list yet — add something to try.</div>';return;}
+  el.innerHTML=pending.slice(0,4).map(i=>{
+    const cat=CATS.find(c=>c.id===i.cat);
+    return `<div class="lpill" onclick="showPage('list')"><div class="lpill-dot" style="background:${cat?cat.color:'#aaa'}"></div>${i.title}</div>`;
   }).join('');
 }
 
-// ═══════════════════════════════════════════════
-// MY LIST SCREEN
-// ═══════════════════════════════════════════════
-function initCatPicker() {
-  const picker = document.getElementById('catPicker');
-  picker.innerHTML = CATEGORIES.map(c =>
-    `<div class="cat-chip ${state.selectedCat === c.id ? 'selected' : ''}"
-          onclick="selectCat('${c.id}')">
-       ${c.emoji} ${c.label}
-     </div>`
+// ─── MY LIST ─────────────────────────────────
+function renderCatBar() {
+  document.getElementById('catBar').innerHTML=CATS.map(c=>
+    `<div class="cchip ${selCat===c.id?'on':''}" onclick="selCatF('${c.id}')">${c.emoji} ${c.label}</div>`
   ).join('');
 }
 
-function selectCat(id) {
-  state.selectedCat = id;
-  initCatPicker();
-}
+function selCatF(id){selCat=id;renderCatBar();}
 
 async function addItem() {
-  const input = document.getElementById('addInput');
-  const title = input.value.trim();
-  if (!title) { input.focus(); return; }
-
-  const id = Date.now();
-  const newItem = {
-    id,
-    title,
-    cat: state.selectedCat,
-    done: false,
-    addedAt: Date.now(),
-  };
-
-  state.items.unshift(newItem);
-  saveState();
-  input.value = '';
-  renderList();
-  renderTodayPills();
-  showToast('Added to your list ✦');
-
-  // Fetch image in background (cached for rendering)
-  fetchPhoto(state.selectedCat);
+  const inp=document.getElementById('addInp');
+  const title=inp.value.trim();
+  if(!title||!user){inp.focus();return;}
+  const saved=await dbInsert({title,cat:selCat,done:false,is_challenge:false});
+  if(saved){items.unshift(saved);inp.value='';renderList();renderPills();toast('Added ✦');getPhoto(selCat);}
 }
 
 function renderList() {
-  const pending = state.items.filter(i => !i.done);
-  const done = state.items.filter(i => i.done);
-  const all = [...pending, ...done];
-
-  const countEl = document.getElementById('itemCount');
-  countEl.textContent = pending.length === 1 ? '1 to try' : `${pending.length} to try`;
-
-  const emptyEl = document.getElementById('emptyList');
-  const listEl = document.getElementById('listItems');
-
-  if (all.length === 0) {
-    emptyEl.style.display = 'block';
-    listEl.innerHTML = '';
-    return;
-  }
-
-  emptyEl.style.display = 'none';
-
-  // Pending section
-  let html = '';
-  if (pending.length > 0) {
-    html += `<div class="list-section-label" style="margin-bottom:10px">To try</div>`;
-    html += pending.map(item => itemHTML(item)).join('');
-  }
-  if (done.length > 0) {
-    html += `<div class="list-section-label" style="margin-top:20px;margin-bottom:10px">Completed</div>`;
-    html += done.map(item => itemHTML(item)).join('');
-  }
-
-  listEl.innerHTML = html;
-
-  // Load images async
-  all.forEach(item => {
-    const cat = CATEGORIES.find(c => c.id === item.cat);
-    const cached = state.photoCache[item.cat];
-    if (cached) {
-      const imgEl = document.getElementById(`img-${item.id}`);
-      if (imgEl) {
-        imgEl.src = cached;
-        imgEl.onload = () => imgEl.classList.remove('loading');
-      }
-    } else {
-      fetchPhoto(item.cat).then(url => {
-        if (url) {
-          const imgEl = document.getElementById(`img-${item.id}`);
-          if (imgEl) {
-            imgEl.src = url;
-            imgEl.onload = () => imgEl.classList.remove('loading');
-          }
-        }
-      });
-    }
+  const pending=items.filter(i=>!i.done);
+  const done=items.filter(i=>i.done);
+  document.getElementById('lCount').textContent=pending.length===1?'1 to try':`${pending.length} to try`;
+  document.getElementById('lEmpty').style.display=(pending.length+done.length===0)?'block':'none';
+  let h='';
+  if(pending.length){h+=`<div class="lsec" style="margin-bottom:9px">To try</div>${pending.map(iHTML).join('')}`;}
+  if(done.length){h+=`<div class="lsec" style="margin-top:18px;margin-bottom:9px">Completed</div>${done.map(iHTML).join('')}`;}
+  document.getElementById('lItems').innerHTML=h;
+  [...pending,...done].forEach(i=>{
+    const cached=photos[i.cat];
+    const el=document.getElementById(`ii-${i.id}`);
+    if(!el) return;
+    if(cached){el.src=cached;el.onload=()=>el.classList.remove('dim');}
+    else getPhoto(i.cat).then(url=>{if(url&&document.getElementById(`ii-${i.id}`)){const e=document.getElementById(`ii-${i.id}`);e.src=url;e.onload=()=>e.classList.remove('dim');}});
   });
-
-  initCatPicker();
+  renderCatBar();
 }
 
-function itemHTML(item) {
-  const cat = CATEGORIES.find(c => c.id === item.cat);
-  return `
-    <div class="bucket-item ${item.done ? 'done' : ''}" onclick="toggleItem(${item.id})">
-      <div class="item-img-wrap">
-        <div class="item-img-fallback">${cat ? cat.emoji : '✦'}</div>
-        <img class="item-img loading" id="img-${item.id}" alt="${item.title}" />
-      </div>
-      <div class="item-info">
-        <div class="item-title">${item.title}</div>
-        <div class="item-meta">
-          <div class="item-cat-dot" style="background:${cat ? cat.color : '#aaa'}"></div>
-          <span>${cat ? cat.label : ''}</span>
-        </div>
-      </div>
-      <div class="item-check">${item.done ? '✓' : ''}</div>
-    </div>`;
+function iHTML(item) {
+  const cat=CATS.find(c=>c.id===item.cat);
+  return `<div class="bitem ${item.done?'done':''}" onclick="toggleItem('${item.id}')">
+    <div class="iimg-wrap"><div class="iimg-fallback">${cat?cat.emoji:'✦'}</div><img class="iimg dim" id="ii-${item.id}" alt="${item.title}"></div>
+    <div class="iinfo"><div class="ititle">${item.title}</div><div class="imeta"><div class="icat-dot" style="background:${cat?cat.color:'#aaa'}"></div><span>${cat?cat.label:''}</span></div></div>
+    <div class="icheck">${item.done?'✓':''}</div>
+  </div>`;
 }
 
-function toggleItem(id) {
-  const item = state.items.find(i => i.id === id);
-  if (!item) return;
-  if (item.done) {
-    // Undo
-    item.done = false;
-    saveState();
-    renderList();
-    renderTodayPills();
-    showToast('Marked as to try again');
-  } else {
-    // Complete
-    item.done = true;
-    saveState();
-    openModal(id, false);
-    renderList();
-    renderTodayPills();
-  }
+async function toggleItem(id) {
+  const item=items.find(i=>i.id===id); if(!item) return;
+  if(item.done){item.done=false;await dbUpdate(id,{done:false});renderList();renderPills();toast('Marked as to try again');}
+  else{item.done=true;await dbUpdate(id,{done:true});renderList();renderPills();openModal(id);}
 }
 
-// ═══════════════════════════════════════════════
-// REFLECTION MODAL
-// ═══════════════════════════════════════════════
-function openModal(itemId, isChallenge) {
-  modalItemId = itemId;
-  modalRating = 0;
-  modalIsChallenge = isChallenge;
-
-  const item = state.items.find(i => i.id === itemId);
-  if (!item) return;
-
-  const cat = CATEGORIES.find(c => c.id === item.cat);
-
-  // Populate
-  document.getElementById('modalTitle').textContent = item.title;
-  document.getElementById('modalCatLabel').textContent = cat ? cat.label : '';
-  document.getElementById('modalCatDot').style.background = cat ? cat.color : '#aaa';
-  document.getElementById('modalFallbackEmoji').textContent = cat ? cat.emoji : '✦';
-  document.getElementById('noteArea').value = '';
-
-  // Image
-  const modalImg = document.getElementById('modalImg');
-  const cached = state.photoCache[item.cat];
-  if (cached) {
-    modalImg.src = cached;
-    modalImg.style.display = 'block';
-  } else {
-    modalImg.style.display = 'none';
-  }
-
-  // Reset stars
-  document.querySelectorAll('.star-btn').forEach(s => s.classList.remove('lit'));
-
-  // Open
-  document.getElementById('modalOverlay').classList.add('open');
-
-  // If challenge, mark done
-  if (isChallenge) {
-    state.challengeDone = true;
-    saveState();
-    renderChallenge();
-  }
+// ─── MODAL ───────────────────────────────────
+function openModal(id) {
+  modalId=id; modalRating=0;
+  const item=items.find(i=>i.id===id); if(!item) return;
+  const cat=CATS.find(c=>c.id===item.cat);
+  document.getElementById('mTitle').textContent=item.title;
+  document.getElementById('mCat').textContent=cat?cat.label:'';
+  document.getElementById('mDot').style.background=cat?cat.color:'#aaa';
+  document.getElementById('mFe').textContent=cat?cat.emoji:'✦';
+  document.getElementById('mNote').value='';
+  document.querySelectorAll('.star').forEach(s=>s.classList.remove('lit'));
+  const mp=document.getElementById('mPhoto'), cached=photos[item.cat];
+  if(cached){mp.src=cached;mp.style.display='block';} else mp.style.display='none';
+  document.getElementById('modalBg').classList.add('on');
 }
 
-function closeModal() {
-  document.getElementById('modalOverlay').classList.remove('open');
-  modalItemId = null;
-  modalRating = 0;
-}
-
-function handleOverlayClick(e) {
-  if (e.target === document.getElementById('modalOverlay')) closeModal();
-}
+function closeModal(){document.getElementById('modalBg').classList.remove('on');modalId=null;modalRating=0;}
+function bgClick(e){if(e.target===document.getElementById('modalBg'))closeModal();}
 
 function setStar(v) {
-  modalRating = v;
-  document.querySelectorAll('.star-btn').forEach(s => {
-    s.classList.toggle('lit', parseInt(s.dataset.v) <= v);
-  });
+  modalRating=v;
+  document.querySelectorAll('.star').forEach((s,i)=>s.classList.toggle('lit',i<v));
 }
 
-function saveReflection() {
-  if (!modalItemId) { closeModal(); return; }
-  const note = document.getElementById('noteArea').value.trim();
-  const rating = modalRating || 3;
-
-  // Remove old reflection for this item
-  state.reflections = state.reflections.filter(r => r.itemId !== modalItemId);
-  state.reflections.unshift({
-    itemId: modalItemId,
-    rating,
-    note,
-    date: Date.now(),
-  });
-
-  saveState();
-  closeModal();
-  showToast('Reflection saved ✦');
+async function saveRef() {
+  if(!modalId){closeModal();return;}
+  await dbReflection(modalId,modalRating||3,document.getElementById('mNote').value.trim());
+  closeModal();toast('Reflection saved ✦');
 }
 
-function skipReflection() {
-  closeModal();
-}
+// ─── TOAST ───────────────────────────────────
+let tt;
+function toast(msg){const el=document.getElementById('toast');el.textContent=msg;el.classList.add('show');clearTimeout(tt);tt=setTimeout(()=>el.classList.remove('show'),2400);}
 
-// ═══════════════════════════════════════════════
-// TOAST
-// ═══════════════════════════════════════════════
-let toastTimer;
-function showToast(msg) {
-  const t = document.getElementById('toast');
-  t.textContent = msg;
-  t.classList.add('show');
-  clearTimeout(toastTimer);
-  toastTimer = setTimeout(() => t.classList.remove('show'), 2400);
-}
+// ─── LOADING ─────────────────────────────────
+function hideLoading(){setTimeout(()=>document.getElementById('loading').classList.add('gone'),500);}
 
-// ═══════════════════════════════════════════════
-// BOOT
-// ═══════════════════════════════════════════════
-loadState();
-initChallenge();
-initCatPicker();
+// ─── BOOT ────────────────────────────────────
+loadCache();
 </script>
 </body>
 </html>
