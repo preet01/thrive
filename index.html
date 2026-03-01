@@ -44,57 +44,26 @@ body { max-width: 430px; margin: 0 auto; }
 }
 #auth.gone { opacity: 0; pointer-events: none; }
 
-/* FIX 3: Auth hero — real photo, tall, immersive */
 .auth-hero {
-  height: 260px;
-  position: relative;
-  flex-shrink: 0;
-  overflow: hidden;
+  height: 260px; position: relative; flex-shrink: 0; overflow: hidden;
   background: linear-gradient(160deg, #1a4a2e 0%, #0d2e1c 50%, #060e08 100%);
 }
-.auth-hero-photo {
-  position: absolute; inset: 0;
-  width: 100%; height: 100%;
-  object-fit: cover;
-  opacity: 0;
-  transition: opacity 1.2s ease;
-}
+.auth-hero-photo { position:absolute; inset:0; width:100%; height:100%; object-fit:cover; opacity:0; transition:opacity 1.2s ease; }
 .auth-hero-photo.loaded { opacity: 1; }
-/* Strong gradient so logo + tagline always readable */
 .auth-hero-grad {
-  position: absolute; inset: 0;
-  background: linear-gradient(
-    to bottom,
-    rgba(0,0,0,0.1) 0%,
-    rgba(0,0,0,0.0) 30%,
-    rgba(0,0,0,0.55) 70%,
-    rgba(0,0,0,0.88) 100%
-  );
+  position:absolute; inset:0;
+  background:linear-gradient(to bottom, rgba(0,0,0,.1) 0%, rgba(0,0,0,0) 30%, rgba(0,0,0,.55) 70%, rgba(0,0,0,.88) 100%);
 }
-.auth-hero-text {
-  position: absolute;
-  bottom: 0; left: 0; right: 0;
-  padding: 20px 24px 24px;
-  z-index: 5;
-}
-.auth-logo {
-  font-family:'Lora',serif; font-style:italic; font-size:30px;
-  color: #fff; text-shadow: 0 1px 12px rgba(0,0,0,.4);
-  display: block; margin-bottom: 6px;
-}
-.auth-tagline-hero {
-  font-size: 13px; color: rgba(255,255,255,.7);
-  font-weight: 300; line-height: 1.5;
-}
+.auth-hero-text { position:absolute; bottom:0; left:0; right:0; padding:20px 24px 24px; z-index:5; }
+.auth-logo { font-family:'Lora',serif; font-style:italic; font-size:30px; color:#fff; text-shadow:0 1px 12px rgba(0,0,0,.4); display:block; margin-bottom:6px; }
+.auth-tagline-hero { font-size:13px; color:rgba(255,255,255,.7); font-weight:300; line-height:1.5; }
 
 .auth-body { flex:1; padding:20px 26px 44px; }
 .auth-headline { font-family:'Lora',serif; font-style:italic; font-size:18px; color:var(--ink); margin-bottom:5px; line-height:1.4; }
 .auth-sub { font-size:12px; color:var(--ink3); margin-bottom:24px; font-weight:300; line-height:1.6; }
-
 .auth-tabs { display:flex; border-bottom:1px solid var(--ink4); margin-bottom:20px; }
 .auth-tab { flex:1; background:none; border:none; border-bottom:2px solid transparent; margin-bottom:-1px; padding:10px 0; font-family:'DM Sans',sans-serif; font-size:13px; font-weight:500; color:var(--ink3); cursor:pointer; transition:all .2s; }
 .auth-tab.on { color:var(--ink); border-bottom-color:var(--ink); }
-
 .auth-form { display:flex; flex-direction:column; gap:12px; }
 .auth-form.hide { display:none; }
 .field-lbl { display:block; font-size:10px; letter-spacing:1px; text-transform:uppercase; color:var(--ink3); font-weight:500; margin-bottom:4px; }
@@ -107,6 +76,202 @@ body { max-width: 430px; margin: 0 auto; }
 .auth-msg.show { display:block; }
 .auth-msg.err { color:#b03030; background:#fdf0ee; }
 .auth-msg.ok  { color:var(--accent); background:#e8f3ed; }
+
+/* ═══════════════════════════════════════
+   ONBOARDING — SCREEN 1: THE QUESTION
+═══════════════════════════════════════ */
+#onboard-q {
+  position: fixed; inset: 0; max-width: 430px; margin: 0 auto;
+  background: var(--ink);
+  z-index: 1800; display: flex; flex-direction: column;
+  opacity: 0; pointer-events: none;
+  transition: opacity 0.4s ease;
+  overflow: hidden;
+}
+#onboard-q.on { opacity: 1; pointer-events: all; }
+
+.oq-bg-photo {
+  position: absolute; inset: 0; width: 100%; height: 100%;
+  object-fit: cover; opacity: 0; transition: opacity 1.4s ease;
+}
+.oq-bg-photo.loaded { opacity: 0.35; }
+.oq-bg-grad {
+  position: absolute; inset: 0;
+  background: linear-gradient(to bottom, rgba(28,28,26,.3) 0%, rgba(28,28,26,.7) 50%, rgba(28,28,26,.97) 100%);
+}
+
+.oq-content {
+  position: relative; z-index: 5;
+  display: flex; flex-direction: column;
+  height: 100%; padding: max(56px, env(safe-area-inset-top) + 20px) 28px max(40px, env(safe-area-inset-bottom));
+}
+
+.oq-step { font-size:9px; letter-spacing:3px; text-transform:uppercase; color:rgba(255,255,255,.35); margin-bottom:auto; }
+
+.oq-main { flex: 1; display: flex; flex-direction: column; justify-content: center; padding-bottom: 20px; }
+
+.oq-logo { font-family:'Lora',serif; font-style:italic; font-size:15px; color:rgba(255,255,255,.4); margin-bottom:32px; }
+
+.oq-q {
+  font-family: 'Lora', serif; font-style: italic;
+  font-size: 28px; color: #fff; line-height: 1.3;
+  margin-bottom: 10px;
+  text-shadow: 0 2px 20px rgba(0,0,0,.4);
+}
+.oq-sub { font-size: 13px; color: rgba(255,255,255,.45); font-weight: 300; line-height: 1.6; margin-bottom: 28px; }
+
+/* The free text box */
+.oq-textarea {
+  width: 100%;
+  background: rgba(255,255,255,.08);
+  border: 1.5px solid rgba(255,255,255,.18);
+  border-radius: 16px;
+  padding: 16px 18px;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 15px; font-weight: 300;
+  color: #fff; line-height: 1.6;
+  resize: none; height: 120px;
+  outline: none;
+  transition: border-color .2s, background .2s;
+  caret-color: rgba(255,255,255,.8);
+}
+.oq-textarea::placeholder { color: rgba(255,255,255,.25); font-style: italic; }
+.oq-textarea:focus { border-color: rgba(255,255,255,.4); background: rgba(255,255,255,.12); }
+
+.oq-hint {
+  font-size: 11px; color: rgba(255,255,255,.25);
+  margin-top: 10px; line-height: 1.5; font-style: italic;
+}
+
+.oq-btn {
+  margin-top: 20px;
+  background: #fff; color: var(--ink);
+  border: none; border-radius: 14px; padding: 16px;
+  font-family: 'DM Sans', sans-serif; font-size: 15px; font-weight: 500;
+  cursor: pointer; transition: all .2s;
+  opacity: 0.4; pointer-events: none;
+}
+.oq-btn.ready { opacity: 1; pointer-events: all; }
+.oq-btn:active { transform: scale(.97); }
+
+/* ═══════════════════════════════════════
+   ONBOARDING — SCREEN 2: SUGGESTIONS
+═══════════════════════════════════════ */
+#onboard-picks {
+  position: fixed; inset: 0; max-width: 430px; margin: 0 auto;
+  background: var(--bg);
+  z-index: 1700; display: flex; flex-direction: column;
+  opacity: 0; pointer-events: none;
+  transition: opacity 0.4s ease;
+  overflow: hidden;
+}
+#onboard-picks.on { opacity: 1; pointer-events: all; }
+
+.op-head {
+  padding: max(52px, env(safe-area-inset-top) + 16px) 24px 16px;
+  background: var(--bg);
+  border-bottom: 1px solid var(--ink4);
+  flex-shrink: 0;
+}
+.op-back { font-size:11px; color:var(--ink3); cursor:pointer; margin-bottom:14px; display:inline-flex; align-items:center; gap:5px; }
+.op-title { font-family:'Lora',serif; font-style:italic; font-size:22px; color:var(--ink); margin-bottom:5px; line-height:1.3; }
+.op-sub { font-size:12px; color:var(--ink3); font-weight:300; line-height:1.5; }
+
+/* Loading state */
+.op-loading {
+  flex: 1; display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  gap: 16px; padding: 40px;
+}
+.op-loading-dots { display: flex; gap: 8px; }
+.op-dot {
+  width: 8px; height: 8px; border-radius: 50%;
+  background: var(--ink4);
+  animation: dotPulse 1.4s ease infinite;
+}
+.op-dot:nth-child(2) { animation-delay: .2s; }
+.op-dot:nth-child(3) { animation-delay: .4s; }
+@keyframes dotPulse { 0%,80%,100%{transform:scale(1);opacity:.4} 40%{transform:scale(1.3);opacity:1} }
+.op-loading-text { font-size:13px; color:var(--ink3); font-style:italic; font-weight:300; text-align:center; line-height:1.6; }
+
+/* Suggestion cards scroll */
+.op-scroll {
+  flex: 1; overflow-y: auto; padding: 16px 20px 20px;
+  -webkit-overflow-scrolling: touch;
+  display: none;
+}
+.op-scroll.show { display: block; }
+.op-scroll::-webkit-scrollbar { display: none; }
+
+.op-select-hint {
+  font-size: 11px; color: var(--ink3); margin-bottom: 14px;
+  text-align: center; font-style: italic; font-weight: 300;
+}
+
+/* Suggestion card — tappable, toggleable */
+.sug-card {
+  background: var(--white);
+  border: 1.5px solid var(--ink4);
+  border-radius: 14px;
+  padding: 14px 16px;
+  margin-bottom: 10px;
+  cursor: pointer;
+  transition: all .2s;
+  display: flex; align-items: flex-start; gap: 12px;
+  animation: sugIn .3s ease both;
+}
+.sug-card:nth-child(1) { animation-delay: .05s; }
+.sug-card:nth-child(2) { animation-delay: .10s; }
+.sug-card:nth-child(3) { animation-delay: .15s; }
+.sug-card:nth-child(4) { animation-delay: .20s; }
+.sug-card:nth-child(5) { animation-delay: .25s; }
+.sug-card:nth-child(6) { animation-delay: .30s; }
+.sug-card:nth-child(7) { animation-delay: .35s; }
+.sug-card:nth-child(8) { animation-delay: .40s; }
+@keyframes sugIn { from{opacity:0;transform:translateY(8px)} to{opacity:1;transform:translateY(0)} }
+
+.sug-card.selected {
+  background: var(--ink); border-color: var(--ink);
+}
+.sug-card:active { transform: scale(.98); }
+
+.sug-check {
+  width: 20px; height: 20px; border-radius: 50%;
+  border: 1.5px solid var(--ink4);
+  flex-shrink: 0; margin-top: 1px;
+  display: flex; align-items: center; justify-content: center;
+  transition: all .2s;
+}
+.sug-card.selected .sug-check {
+  background: rgba(255,255,255,.2); border-color: rgba(255,255,255,.4);
+}
+.sug-check-tick { font-size: 11px; color: #fff; display: none; }
+.sug-card.selected .sug-check-tick { display: block; }
+
+.sug-body { flex: 1; }
+.sug-title { font-size: 14px; color: var(--ink); font-weight: 400; line-height: 1.35; margin-bottom: 3px; }
+.sug-card.selected .sug-title { color: #fff; }
+.sug-why { font-size: 11px; color: var(--ink3); font-weight: 300; line-height: 1.5; font-style: italic; }
+.sug-card.selected .sug-why { color: rgba(255,255,255,.55); }
+
+/* Footer CTA */
+.op-footer {
+  padding: 14px 20px max(28px, env(safe-area-inset-bottom));
+  background: var(--bg);
+  border-top: 1px solid var(--ink4);
+  display: none;
+}
+.op-footer.show { display: block; }
+.op-footer-hint { font-size:11px; color:var(--ink3); text-align:center; margin-bottom:10px; font-style:italic; }
+.op-go-btn {
+  width: 100%; background: var(--ink); color: var(--bg);
+  border: none; border-radius: 14px; padding: 16px;
+  font-family: 'DM Sans', sans-serif; font-size: 15px; font-weight: 500;
+  cursor: pointer; transition: all .2s;
+  opacity: .35; pointer-events: none;
+}
+.op-go-btn.ready { opacity: 1; pointer-events: all; }
+.op-go-btn:active { transform: scale(.97); }
 
 /* ─── APP SHELL ─── */
 .app { display:flex; flex-direction:column; height:100vh; height:100dvh; overflow:hidden; position:relative; }
@@ -130,7 +295,6 @@ body { max-width: 430px; margin: 0 auto; }
 
 /* ─── TODAY ─── */
 #page-today { background:var(--ink); }
-
 .hero { position:relative; height:58vh; flex-shrink:0; overflow:hidden; }
 .hero-photo { position:absolute; inset:0; width:100%; height:100%; object-fit:cover; transition:opacity 1s ease; }
 .hero-photo.dim { opacity:0; }
@@ -141,41 +305,23 @@ body { max-width: 430px; margin: 0 auto; }
 .hf-fitness  { background:linear-gradient(170deg,#3a6888 0%,#2a4e6a 30%,#1a3450 60%,#0a1e34 100%); }
 .hf-social   { background:linear-gradient(170deg,#7a6050 0%,#5a4038 30%,#3a2820 60%,#1a1008 100%); }
 .hf-wellness { background:linear-gradient(170deg,#4a7880 0%,#2a5860 30%,#1a3840 60%,#0a2028 100%); }
-
-.hero-gradient {
-  position:absolute; inset:0;
-  background:linear-gradient(to bottom,rgba(0,0,0,.1) 0%,rgba(0,0,0,0) 30%,rgba(0,0,0,.3) 60%,rgba(0,0,0,.85) 100%);
-}
-.hero-topbar {
-  position:absolute; top:0; left:0; right:0;
-  display:flex; justify-content:space-between; align-items:center;
-  padding:max(48px,env(safe-area-inset-top) + 14px) 20px 12px;
-  z-index:5;
-}
+.hero-gradient { position:absolute; inset:0; background:linear-gradient(to bottom,rgba(0,0,0,.1) 0%,rgba(0,0,0,0) 30%,rgba(0,0,0,.3) 60%,rgba(0,0,0,.85) 100%); }
+.hero-topbar { position:absolute; top:0; left:0; right:0; display:flex; justify-content:space-between; align-items:center; padding:max(48px,env(safe-area-inset-top) + 14px) 20px 12px; z-index:5; }
 .hero-logo { font-family:'Lora',serif; font-style:italic; font-size:22px; color:rgba(255,255,255,.95); text-shadow:0 1px 12px rgba(0,0,0,.4); }
 .hero-right { display:flex; align-items:center; gap:10px; }
 .hero-date { font-size:11px; color:rgba(255,255,255,.65); letter-spacing:.5px; }
 .signout { font-size:10px; color:rgba(255,255,255,.55); background:rgba(255,255,255,.12); border:none; border-radius:8px; padding:4px 9px; cursor:pointer; font-family:'DM Sans',sans-serif; backdrop-filter:blur(8px); }
-
 .hero-content { position:absolute; bottom:0; left:0; right:0; padding:24px 22px 28px; z-index:5; }
-
-/* FIX 1: challenge tag — no category */
-.ctag {
-  display:flex; align-items:center; gap:7px;
-  font-size:9px; letter-spacing:2.5px; text-transform:uppercase;
-  color:rgba(255,255,255,.65); margin-bottom:10px; font-weight:500;
-}
+.ctag { display:flex; align-items:center; gap:7px; font-size:9px; letter-spacing:2.5px; text-transform:uppercase; color:rgba(255,255,255,.65); margin-bottom:10px; font-weight:500; }
 .ctag-dot { width:5px; height:5px; border-radius:50%; background:rgba(255,255,255,.65); }
-
 .ctitle { font-family:'Lora',serif; font-size:24px; font-style:italic; font-weight:400; color:#fff; line-height:1.3; margin-bottom:6px; text-shadow:0 1px 16px rgba(0,0,0,.3); }
 .cdesc { font-size:13px; color:rgba(255,255,255,.65); line-height:1.6; font-weight:300; margin-bottom:20px; }
 .cbtns { display:flex; gap:10px; }
-.btn-did { flex:1; background:rgba(255,255,255,.95); color:var(--ink); border:none; border-radius:14px; padding:15px 20px; font-family:'DM Sans',sans-serif; font-size:14px; font-weight:500; cursor:pointer; transition:all .2s; letter-spacing:.2px; backdrop-filter:blur(8px); }
+.btn-did { flex:1; background:rgba(255,255,255,.95); color:var(--ink); border:none; border-radius:14px; padding:15px 20px; font-family:'DM Sans',sans-serif; font-size:14px; font-weight:500; cursor:pointer; transition:all .2s; backdrop-filter:blur(8px); }
 .btn-did:active { transform:scale(.97); }
 .btn-did.done { background:rgba(200,149,42,.9); color:#fff; }
 .btn-skip2 { width:52px; background:rgba(255,255,255,.12); border:1px solid rgba(255,255,255,.2); border-radius:14px; font-size:18px; color:rgba(255,255,255,.8); cursor:pointer; display:flex; align-items:center; justify-content:center; flex-shrink:0; transition:all .18s; backdrop-filter:blur(8px); }
 .btn-skip2:active { transform:scale(.95); }
-
 .today-card { flex:1; background:var(--bg); padding:20px 20px 100px; overflow-y:auto; -webkit-overflow-scrolling:touch; }
 .today-card::-webkit-scrollbar { display:none; }
 .sec-label { font-size:9px; letter-spacing:2px; text-transform:uppercase; color:var(--ink4); margin-bottom:12px; font-weight:500; }
@@ -196,7 +342,6 @@ body { max-width: 430px; margin: 0 auto; }
 .add-inp::placeholder { color:var(--ink4); }
 .add-go { background:var(--ink); color:var(--bg); border:none; border-radius:10px; padding:8px 15px; font-family:'DM Sans',sans-serif; font-size:12px; font-weight:500; cursor:pointer; white-space:nowrap; flex-shrink:0; transition:all .18s; }
 .add-go:active { transform:scale(.96); }
-
 .lscroll { flex:1; overflow-y:auto; padding:16px 20px 100px; -webkit-overflow-scrolling:touch; }
 .lscroll::-webkit-scrollbar { display:none; }
 
@@ -213,28 +358,11 @@ body { max-width: 430px; margin: 0 auto; }
 .pitem-check-btn { display:flex; align-items:center; gap:8px; background:var(--bg); border:1.5px solid var(--ink4); border-radius:22px; padding:7px 14px; font-size:12px; color:var(--ink2); font-weight:500; cursor:pointer; font-family:'DM Sans',sans-serif; transition:all .2s; width:fit-content; }
 .pitem-check-circle { width:16px; height:16px; border-radius:50%; border:1.5px solid var(--ink3); flex-shrink:0; }
 
-/* FIX 2: Completed divider — bold, clear, visible */
-.journal-divider {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  margin: 28px 0 18px;
-}
-.journal-divider-line {
-  flex: 1;
-  height: 1.5px;
-  background: var(--ink);
-  opacity: 0.12;
-}
-.journal-divider-label {
-  font-size: 11px;
-  letter-spacing: 2px;
-  text-transform: uppercase;
-  color: var(--ink);
-  font-weight: 500;
-  flex-shrink: 0;
-}
-.journal-divider-trophy { font-size: 14px; flex-shrink:0; }
+/* ─── JOURNAL DIVIDER ─── */
+.journal-divider { display:flex; align-items:center; gap:12px; margin:28px 0 18px; }
+.journal-divider-line { flex:1; height:1.5px; background:var(--ink); opacity:.12; }
+.journal-divider-label { font-size:11px; letter-spacing:2px; text-transform:uppercase; color:var(--ink); font-weight:500; flex-shrink:0; }
+.journal-divider-trophy { font-size:14px; flex-shrink:0; }
 
 /* ─── COMPLETED CARD ─── */
 .citem { background:var(--white); border-radius:var(--r); margin-bottom:14px; box-shadow:var(--shadow-gold); border:1.5px solid rgba(200,149,42,.2); overflow:hidden; cursor:pointer; transition:all .2s; position:relative; }
@@ -262,7 +390,7 @@ body { max-width: 430px; margin: 0 auto; }
 .confetti-wrap { position:fixed; inset:0; pointer-events:none; z-index:999; }
 .confetti-piece { position:absolute; width:8px; height:8px; border-radius:2px; }
 
-/* ─── EMPTY ─── */
+/* ─── EMPTY STATE ─── */
 .lempty { text-align:center; padding:60px 20px; color:var(--ink3); }
 .lempty .ei { font-size:40px; margin-bottom:14px; }
 .lempty p { font-size:14px; line-height:1.6; font-weight:300; font-style:italic; font-family:'Lora',serif; }
@@ -298,7 +426,7 @@ body { max-width: 430px; margin: 0 auto; }
 .toast { position:fixed; top:58px; left:50%; transform:translateX(-50%) translateY(-18px); background:var(--ink); color:var(--bg); padding:10px 22px; border-radius:20px; font-size:13px; z-index:1000; opacity:0; transition:all .25s ease; white-space:nowrap; pointer-events:none; }
 .toast.show { opacity:1; transform:translateX(-50%) translateY(0); }
 
-/* ─── NEXT UP HIGHLIGHT ─── */
+/* ─── NEXT-UP HIGHLIGHT ─── */
 @keyframes pulseHighlight {
   0%   { box-shadow: var(--shadow), 0 0 0 0 rgba(45,106,79,.4); }
   50%  { box-shadow: var(--shadow), 0 0 0 6px rgba(45,106,79,.15); }
@@ -314,7 +442,6 @@ body { max-width: 430px; margin: 0 auto; }
 
 <!-- AUTH -->
 <div id="auth">
-  <!-- FIX 3: Real photo hero with inspiring tagline over it -->
   <div class="auth-hero">
     <img class="auth-hero-photo" id="authHeroPhoto" alt="">
     <div class="auth-hero-grad"></div>
@@ -325,7 +452,7 @@ body { max-width: 430px; margin: 0 auto; }
   </div>
   <div class="auth-body">
     <div class="auth-headline">Discover what you truly enjoy.</div>
-    <div class="auth-sub">Daily challenges, a personal bucket list, and a space to reflect on what matters.</div>
+    <div class="auth-sub">Daily challenges, a personal list, and a space to reflect on what matters.</div>
     <div class="auth-tabs">
       <button class="auth-tab on" onclick="switchTab('in')">Sign in</button>
       <button class="auth-tab" onclick="switchTab('up')">Create account</button>
@@ -345,9 +472,60 @@ body { max-width: 430px; margin: 0 auto; }
   </div>
 </div>
 
+<!-- ONBOARDING SCREEN 1: THE QUESTION -->
+<div id="onboard-q">
+  <img class="oq-bg-photo" id="oqPhoto" alt="">
+  <div class="oq-bg-grad"></div>
+  <div class="oq-content">
+    <div class="oq-step">Step 1 of 2 · Personalising your experience</div>
+    <div class="oq-main">
+      <div class="oq-logo">Thrive</div>
+      <div class="oq-q">What's going on in your life right now?</div>
+      <div class="oq-sub">Be honest. The more real you are, the more personal this gets.</div>
+      <textarea
+        class="oq-textarea"
+        id="oqText"
+        placeholder="e.g. I feel stuck in the same routine and I've stopped doing things that excite me…"
+        oninput="oqCheck()"
+      ></textarea>
+      <div class="oq-hint">No one else will see this. It's just for you.</div>
+    </div>
+    <button class="oq-btn" id="oqBtn" onclick="goToSuggestions()">Show me what to try →</button>
+  </div>
+</div>
+
+<!-- ONBOARDING SCREEN 2: SUGGESTIONS -->
+<div id="onboard-picks">
+  <div class="op-head">
+    <div class="op-back" onclick="backToQuestion()">← Back</div>
+    <div class="op-title" id="opTitle">Finding things for you…</div>
+    <div class="op-sub" id="opSub">One moment.</div>
+  </div>
+
+  <!-- Loading dots -->
+  <div class="op-loading" id="opLoading">
+    <div class="op-loading-dots">
+      <div class="op-dot"></div>
+      <div class="op-dot"></div>
+      <div class="op-dot"></div>
+    </div>
+    <div class="op-loading-text">Reading what you wrote<br>and finding things that fit…</div>
+  </div>
+
+  <!-- Cards -->
+  <div class="op-scroll" id="opScroll">
+    <div class="op-select-hint">Tap everything that feels right. Pick as many as you want.</div>
+    <div id="opCards"></div>
+  </div>
+
+  <div class="op-footer" id="opFooter">
+    <div class="op-footer-hint" id="opFooterHint">Select at least one to continue</div>
+    <button class="op-go-btn" id="opGoBtn" onclick="finishOnboarding()">Start my list →</button>
+  </div>
+</div>
+
 <!-- APP -->
 <div class="app">
-
   <!-- TODAY -->
   <div class="page on" id="page-today">
     <div class="hero">
@@ -362,18 +540,17 @@ body { max-width: 430px; margin: 0 auto; }
         </div>
       </div>
       <div class="hero-content">
-        <!-- FIX 1: just "Daily Challenge" — no category name -->
-        <div class="ctag"><div class="ctag-dot"></div><span>Daily Challenge</span></div>
+        <div class="ctag"><div class="ctag-dot"></div><span>Up next</span></div>
         <div class="ctitle" id="cTitle">Loading…</div>
         <div class="cdesc" id="cDesc"></div>
         <div class="cbtns">
           <button class="btn-did" id="btnDid" onclick="completeChallenge()">I did this ✓</button>
-          <button class="btn-skip2" onclick="skipChallenge()">↻</button>
+          <button class="btn-skip2" id="btnSkip" onclick="skipChallenge()">↻</button>
         </div>
       </div>
     </div>
     <div class="today-card">
-      <div class="sec-label">On your list</div>
+      <div class="sec-label">Also on your list</div>
       <div class="qpills" id="todayPills"></div>
     </div>
   </div>
@@ -393,7 +570,6 @@ body { max-width: 430px; margin: 0 auto; }
     <div class="lscroll" id="lScroll">
       <div class="lempty" id="lEmpty"><div class="ei">🗺️</div><p>Your list is empty.<br>Add the first thing you want to try.</p></div>
       <div id="lPending"></div>
-      <!-- FIX 2: bold divider with lines -->
       <div id="journalSection" style="display:none">
         <div class="journal-divider">
           <div class="journal-divider-line"></div>
@@ -405,7 +581,6 @@ body { max-width: 430px; margin: 0 auto; }
       </div>
     </div>
   </div>
-
 </div>
 
 <!-- NAV -->
@@ -418,7 +593,7 @@ body { max-width: 430px; margin: 0 auto; }
   </button>
 </nav>
 
-<!-- MODAL -->
+<!-- REFLECTION MODAL -->
 <div class="modal-bg" id="modalBg" onclick="bgClick(event)">
   <div class="modal-sheet" id="modalSheet">
     <div class="mhandle"></div>
@@ -458,6 +633,8 @@ const sb = createClient(
 
 // ─── CONFIG ──────────────────────────
 const UNSPLASH = '6TS9FphLnaJGEhcHqdDbG7WvQ55RbNKIEunJ8x4-xhQ';
+// Claude is called via a Supabase Edge Function proxy — key never touches the browser
+const CLAUDE_PROXY = 'https://peqgoudpwwmanbcjdgsw.supabase.co/functions/v1/claude-proxy';
 
 const CATS = [
   { id:'nature',   label:'Nature',   emoji:'🌿', q:'forest nature morning light mist' },
@@ -468,52 +645,48 @@ const CATS = [
   { id:'wellness', label:'Wellness', emoji:'🧘', q:'calm ocean sunrise meditation golden hour' },
 ];
 
-// FIX 5: 16 challenges so rotation stays fresh longer
-const CHALLENGES = [
-  { title:'Sit in nature for 20 quiet minutes',       desc:'No music, no podcast. Just you, your senses, and whatever is alive around you.',              cat:'nature'  },
-  { title:'Cook a cuisine you have never tried',      desc:'Pick a country. Find one traditional recipe. The process matters more than perfection.',      cat:'food'    },
-  { title:'Go somewhere completely unfamiliar',       desc:'A neighbourhood, a road you always pass but never take. Let curiosity lead for 30 minutes.',  cat:'nature'  },
-  { title:'Create something with your hands today',   desc:'Sketch, sculpt, bake, build. Make something physical that did not exist this morning.',       cat:'arts'    },
-  { title:'Have one genuinely deep conversation',     desc:'Ask someone what has really been on their mind lately. Then actually listen.',                 cat:'social'  },
-  { title:'Move your body in a way that feels like play', desc:'Not exercise — play. Sprint, climb, dance. Move like you did as a child.',                cat:'fitness' },
-  { title:'Spend one hour completely phone-free',     desc:'From right now. No checking, no glancing. See what fills the space.',                         cat:'wellness'},
-  { title:'Do one thing that scares you a little',    desc:'Not dangerous — just outside your comfort zone. The size does not matter.',                   cat:'wellness'},
-  { title:'Watch the sunrise or sunset fully',        desc:'No photos. Just watch it. The whole thing, start to finish.',                                  cat:'nature'  },
-  { title:'Write three pages of anything',            desc:'Stream of consciousness. No editing. No audience. Just your unfiltered mind on paper.',        cat:'arts'    },
-  { title:'Eat somewhere you have never been',        desc:'Not delivery. Sit somewhere new, order something unfamiliar. Taste something for the first time.', cat:'food'},
-  { title:'Have a conversation with a stranger',      desc:'Ask them one real question. Not about the weather. Something genuine.',                        cat:'social'  },
-  { title:'Try a physical activity you have avoided', desc:'Swimming, climbing, dancing — whatever you have been telling yourself you are not good at.',    cat:'fitness' },
-  { title:'Spend two hours in total silence',         desc:'No music, no background noise, no podcasts. Just the sound of whatever is around you.',        cat:'wellness'},
-  { title:'Visit a museum, gallery or exhibition',    desc:'Take your time with just three things. Really look at them.',                                   cat:'arts'    },
-  { title:'Cook a full meal entirely from scratch',   desc:'No shortcuts. Everything made by hand. Notice what the process does to your mood.',            cat:'food'    },
-];
-
 // ─── STATE ───────────────────────────
 let user = null;
 let items = [];
 let reflections = {};
 let photos = {};
-// FIX 5: track which challenge indices have been shown
 let shownChallenges = [];
-let cIdx = 0, cDate = '', cDone = false;
+let cItemId = null;   // ID of the item currently shown as "today's challenge"
+let cDate = '';
+let cDone = false;
 let modalId = null, modalRating = 0, modalIsEdit = false;
-// FIX 4: track the item id that was just completed to auto-advance after
-let justCompletedId = null;
+let sugSelected = new Set();
+let sugData = [];   // [{title, why, cat}]
 
 // ─── CACHE ───────────────────────────
 function loadCache() {
   try {
-    const c = JSON.parse(localStorage.getItem('tv3') || '{}');
+    const c = JSON.parse(localStorage.getItem('tv4') || '{}');
     photos = c.photos || {};
-    cIdx = c.cIdx || 0;
+    cItemId = c.cItemId || null;
     cDate = c.cDate || '';
     cDone = c.cDone || false;
     shownChallenges = c.shownChallenges || [];
   } catch(e) {}
 }
 function saveCache() {
-  try { localStorage.setItem('tv3', JSON.stringify({photos,cIdx,cDate,cDone,shownChallenges})); } catch(e) {}
+  try { localStorage.setItem('tv4', JSON.stringify({photos,cItemId,cDate,cDone,shownChallenges})); } catch(e) {}
 }
+
+// ─── LOADING ─────────────────────────
+let authResolved = false;
+function hideLoading() {
+  if (authResolved) return;
+  authResolved = true;
+  setTimeout(() => document.getElementById('loading').classList.add('gone'), 400);
+}
+setTimeout(() => {
+  if (!authResolved) {
+    authResolved = true;
+    document.getElementById('loading').classList.add('gone');
+    document.getElementById('auth').classList.remove('gone');
+  }
+}, 3000);
 
 // ─── AUTH ────────────────────────────
 function switchTab(t) {
@@ -550,44 +723,33 @@ async function doSignup(e) {
 
 async function doSignout() { await sb.auth.signOut(); }
 
-// FIX 3: Load inspiring auth hero photo
 async function loadAuthPhoto() {
-  const url = await getPhoto('social'); // people doing fun activities
+  const url = await getPhoto('social');
   if (url) {
     const img = document.getElementById('authHeroPhoto');
-    img.src = url;
-    img.onload = () => img.classList.add('loaded');
+    img.src = url; img.onload = () => img.classList.add('loaded');
   }
 }
-
-// FIX 2: Auth state — robust timeout so loader never gets stuck
-let authResolved = false;
-function hideLoading() {
-  if (authResolved) return;
-  authResolved = true;
-  setTimeout(() => document.getElementById('loading').classList.add('gone'), 400);
-}
-
-// Fallback: if Supabase takes >3s, hide loader anyway
-setTimeout(() => {
-  if (!authResolved) {
-    authResolved = true;
-    document.getElementById('loading').classList.add('gone');
-    document.getElementById('auth').classList.remove('gone');
-  }
-}, 3000);
 
 sb.auth.onAuthStateChange(async (_, session) => {
   if (session?.user) {
     user = session.user;
     document.getElementById('auth').classList.add('gone');
     await loadData();
-    initChallenge();
+    // Check if onboarding needed
+    const needsOnboarding = items.length === 0;
+    if (needsOnboarding) {
+      startOnboarding();
+    } else {
+      initToday();
+    }
     hideLoading();
   } else {
     user = null; items = []; reflections = {};
     document.getElementById('auth').classList.remove('gone');
-    loadAuthPhoto(); // load the inspiring photo
+    document.getElementById('onboard-q').classList.remove('on');
+    document.getElementById('onboard-picks').classList.remove('on');
+    loadAuthPhoto();
     hideLoading();
   }
 });
@@ -629,6 +791,157 @@ async function getPhoto(catId) {
   } catch(e) { return null; }
 }
 
+// ─── ONBOARDING ──────────────────────
+
+function startOnboarding() {
+  // Load background photo for the question screen
+  getPhoto('nature').then(url => {
+    if (url) {
+      const img = document.getElementById('oqPhoto');
+      img.src = url; img.onload = () => img.classList.add('loaded');
+    }
+  });
+  document.getElementById('onboard-q').classList.add('on');
+}
+
+function oqCheck() {
+  const val = document.getElementById('oqText').value.trim();
+  const btn = document.getElementById('oqBtn');
+  btn.classList.toggle('ready', val.length > 15);
+}
+
+function backToQuestion() {
+  document.getElementById('onboard-picks').classList.remove('on');
+  setTimeout(() => document.getElementById('onboard-q').classList.add('on'), 50);
+}
+
+async function goToSuggestions() {
+  const text = document.getElementById('oqText').value.trim();
+  if (text.length < 15) return;
+
+  // Transition to picks screen
+  document.getElementById('onboard-q').classList.remove('on');
+  document.getElementById('onboard-picks').classList.add('on');
+
+  // Reset state
+  sugSelected.clear();
+  sugData = [];
+  document.getElementById('opCards').innerHTML = '';
+  document.getElementById('opScroll').classList.remove('show');
+  document.getElementById('opFooter').classList.remove('show');
+  document.getElementById('opLoading').style.display = 'flex';
+  document.getElementById('opTitle').textContent = 'Finding things for you…';
+  document.getElementById('opSub').textContent = 'One moment.';
+
+  // Call Claude API
+  try {
+    const prompt = `A user signed up for "Thrive" — a personal life discovery app. They wrote this about themselves:
+
+"${text}"
+
+Based on exactly what they wrote, suggest 8 specific, personal activities they could try. These should feel like they were chosen specifically for this person — not generic wellness tips.
+
+Each activity should be:
+- Concrete and doable (not vague like "explore your creativity")
+- Matched to the emotional context they described
+- Varied across different life areas (social, physical, creative, reflective, adventurous)
+- Something a real person would actually want to do
+
+Return ONLY a JSON array. No explanation. No markdown. Just the array:
+[
+  {"title": "activity title", "why": "one sentence: why this fits them specifically", "cat": "one of: nature|arts|food|fitness|social|wellness"},
+  ...8 items total
+]`;
+
+    const res = await fetch(CLAUDE_PROXY, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        model: 'claude-sonnet-4-20250514',
+        max_tokens: 1000,
+        messages: [{ role: 'user', content: prompt }]
+      })
+    });
+
+    const data = await res.json();
+    const raw = data?.content?.[0]?.text || '';
+
+    // Parse JSON — strip any accidental markdown fences
+    const cleaned = raw.replace(/```json|```/g, '').trim();
+    sugData = JSON.parse(cleaned);
+
+  } catch(e) {
+    // Fallback suggestions if API fails
+    sugData = [
+      { title: 'Go somewhere you\'ve never been in your city', why: 'Sometimes a change of scenery breaks the loop you\'re in.', cat: 'nature' },
+      { title: 'Cook a meal entirely from scratch', why: 'Making something with your hands can reconnect you to the present.', cat: 'food' },
+      { title: 'Write three pages of anything, unfiltered', why: 'Getting thoughts out of your head often makes room for something new.', cat: 'arts' },
+      { title: 'Have a genuinely honest conversation with someone', why: 'Real connection often starts with saying something true.', cat: 'social' },
+      { title: 'Spend a morning completely phone-free', why: 'You might be surprised what fills the space.', cat: 'wellness' },
+      { title: 'Try one physical thing you\'ve been avoiding', why: 'The body often knows things the mind talks you out of.', cat: 'fitness' },
+      { title: 'Visit a place that always caught your eye but you never entered', why: 'Curiosity deferred is energy wasted.', cat: 'nature' },
+      { title: 'Make something — anything — with your hands today', why: 'Creation is the antidote to feeling passive.', cat: 'arts' },
+    ];
+  }
+
+  // Render suggestion cards
+  document.getElementById('opLoading').style.display = 'none';
+  document.getElementById('opTitle').textContent = 'Here\'s what feels right for you';
+  document.getElementById('opSub').textContent = 'Tap everything that resonates.';
+  document.getElementById('opScroll').classList.add('show');
+  document.getElementById('opFooter').classList.add('show');
+
+  const container = document.getElementById('opCards');
+  container.innerHTML = sugData.map((s, i) => `
+    <div class="sug-card" id="sug-${i}" onclick="toggleSug(${i})">
+      <div class="sug-check"><span class="sug-check-tick">✓</span></div>
+      <div class="sug-body">
+        <div class="sug-title">${s.title}</div>
+        <div class="sug-why">${s.why}</div>
+      </div>
+    </div>
+  `).join('');
+}
+
+function toggleSug(i) {
+  if (sugSelected.has(i)) {
+    sugSelected.delete(i);
+    document.getElementById(`sug-${i}`).classList.remove('selected');
+  } else {
+    sugSelected.add(i);
+    document.getElementById(`sug-${i}`).classList.add('selected');
+  }
+  const count = sugSelected.size;
+  const btn = document.getElementById('opGoBtn');
+  const hint = document.getElementById('opFooterHint');
+  btn.classList.toggle('ready', count > 0);
+  hint.textContent = count === 0
+    ? 'Select at least one to continue'
+    : count === 1 ? '1 selected — or keep adding more'
+    : `${count} selected — ready when you are`;
+}
+
+async function finishOnboarding() {
+  if (sugSelected.size === 0) return;
+
+  const btn = document.getElementById('opGoBtn');
+  btn.textContent = 'Saving your list…';
+  btn.classList.remove('ready');
+
+  // Save selected items to DB
+  const toSave = [...sugSelected].map(i => sugData[i]);
+  for (const s of toSave) {
+    const catId = s.cat || guessCat(s.title);
+    const saved = await dbInsert({ title: s.title, cat: catId, done: false, is_challenge: false });
+    if (saved) items.push(saved);
+  }
+
+  // Dismiss onboarding, go to today
+  document.getElementById('onboard-picks').classList.remove('on');
+  initToday();
+  showToast('Your list is ready ✦');
+}
+
 // ─── NAV ─────────────────────────────
 function showPage(n) {
   document.querySelectorAll('.page').forEach(p => p.classList.remove('on'));
@@ -639,42 +952,63 @@ function showPage(n) {
   if (n==='today') renderPills();
 }
 
-// ─── TODAY ───────────────────────────
+// ─── TODAY — now driven by personal list ─────
 function todayStr() { return new Date().toISOString().slice(0,10); }
 
-// FIX 5: Pick next challenge that hasn't been shown yet
-function pickNextChallenge() {
-  // Reset if we've shown everything
-  if (shownChallenges.length >= CHALLENGES.length) shownChallenges = [];
-  // Find an index we haven't shown
-  const available = CHALLENGES.map((_,i) => i).filter(i => !shownChallenges.includes(i));
-  const pick = available[Math.floor(Math.random() * available.length)];
-  shownChallenges.push(pick);
-  return pick;
-}
-
-function initChallenge() {
+function initToday() {
   const t = todayStr();
-  if (cDate !== t) {
+  const pending = items.filter(i => !i.done);
+
+  if (pending.length === 0) {
+    // All done — show a celebratory empty state
+    renderEmptyToday();
+    hideLoading();
+    return;
+  }
+
+  // If it's a new day OR no current challenge set, pick the next pending item
+  if (cDate !== t || !cItemId || !pending.find(i => i.id === cItemId)) {
     cDate = t;
-    cIdx = pickNextChallenge();
+    // Find first pending item that hasn't been shown recently
+    const notShown = pending.filter(i => !shownChallenges.includes(i.id));
+    const pool = notShown.length > 0 ? notShown : pending;
+    cItemId = pool[0].id;
     cDone = false;
+    shownChallenges.push(cItemId);
+    if (shownChallenges.length > 20) shownChallenges = shownChallenges.slice(-10);
     saveCache();
   }
-  renderChallenge();
+
+  renderToday();
+  renderPills();
 }
 
-function renderChallenge() {
-  const c = CHALLENGES[cIdx % CHALLENGES.length];
-  document.getElementById('cTitle').textContent = c.title;
-  document.getElementById('cDesc').textContent = c.desc;
+function renderToday() {
+  const item = items.find(i => i.id === cItemId);
+  if (!item) { initToday(); return; }
+
+  const cat = CATS.find(c => c.id === item.cat) || CATS[0];
+
+  document.getElementById('cTitle').textContent = item.title;
+  document.getElementById('cDesc').textContent = ''; // No desc for user items
   document.getElementById('hDate').textContent = new Date().toLocaleDateString('en-GB', {weekday:'short',day:'numeric',month:'short'});
-  document.getElementById('hFallback').className = `hero-fallback hf-${c.cat}`;
+  document.getElementById('hFallback').className = `hero-fallback hf-${item.cat}`;
+
   const btn = document.getElementById('btnDid');
-  if (cDone) { btn.textContent='✓ Done for today'; btn.classList.add('done'); btn.disabled=true; btn.style.opacity='.8'; }
-  else { btn.textContent='I did this ✓'; btn.classList.remove('done'); btn.disabled=false; btn.style.opacity=''; }
-  loadHeroPhoto(c.cat);
-  renderPills();
+  if (cDone) {
+    btn.textContent = '✓ Done for today'; btn.classList.add('done'); btn.disabled = true; btn.style.opacity = '.8';
+  } else {
+    btn.textContent = 'I did this ✓'; btn.classList.remove('done'); btn.disabled = false; btn.style.opacity = '';
+  }
+
+  loadHeroPhoto(item.cat);
+}
+
+function renderEmptyToday() {
+  document.getElementById('cTitle').textContent = 'You\'ve done everything on your list.';
+  document.getElementById('cDesc').textContent = 'Add something new to try — or revisit something you loved.';
+  document.getElementById('btnDid').style.display = 'none';
+  document.getElementById('btnSkip').style.display = 'none';
 }
 
 async function loadHeroPhoto(catId) {
@@ -686,31 +1020,40 @@ async function loadHeroPhoto(catId) {
 
 function skipChallenge() {
   if (cDone) { showToast('Already done today!'); return; }
-  cIdx = pickNextChallenge();
+  const pending = items.filter(i => !i.done && i.id !== cItemId);
+  if (pending.length === 0) { showToast('Nothing else on your list'); return; }
+  // Pick next one not recently shown
+  const notShown = pending.filter(i => !shownChallenges.includes(i.id));
+  const pool = notShown.length > 0 ? notShown : pending;
+  cItemId = pool[0].id;
+  shownChallenges.push(cItemId);
+  if (shownChallenges.length > 20) shownChallenges = shownChallenges.slice(-10);
   saveCache();
-  renderChallenge();
-  showToast('New challenge loaded');
+  renderToday();
+  renderPills();
+  showToast('Next up →');
 }
 
 async function completeChallenge() {
-  if (cDone) return;
-  const c = CHALLENGES[cIdx % CHALLENGES.length];
-  const exists = items.find(i => i.is_challenge && i.challenge_index === cIdx);
-  if (exists) { openModal(exists.id, false); return; }
-  const saved = await dbInsert({title:c.title, cat:c.cat, done:true, is_challenge:true, challenge_index:cIdx});
-  if (saved) {
-    items.unshift(saved);
-    cDone = true;
-    saveCache();
-    renderChallenge();
-    openModal(saved.id, false);
-  }
+  if (cDone || !cItemId) return;
+  const item = items.find(i => i.id === cItemId); if (!item) return;
+  item.done = true;
+  await dbUpdate(cItemId, {done:true});
+  celebrate(cItemId);
+  cDone = true;
+  saveCache();
+  renderToday();
+  renderPills();
+  setTimeout(() => openModal(cItemId, false), 600);
 }
 
 function renderPills() {
   const el = document.getElementById('todayPills');
-  const pending = items.filter(i => !i.done && !i.is_challenge);
-  if (!pending.length) { el.innerHTML='<div class="pills-empty">Nothing on your list yet — add something.</div>'; return; }
+  const pending = items.filter(i => !i.done && i.id !== cItemId);
+  if (!pending.length) {
+    el.innerHTML = '<div class="pills-empty">Nothing else on your list right now.</div>';
+    return;
+  }
   el.innerHTML = pending.slice(0,4).map(i =>
     `<div class="qpill" onclick="showPage('list')"><div class="qp-dot" style="background:var(--accent)"></div>${i.title}</div>`
   ).join('');
@@ -723,7 +1066,15 @@ async function addItem() {
   if (!title || !user) { inp.focus(); return; }
   const catId = guessCat(title);
   const saved = await dbInsert({title, cat:catId, done:false, is_challenge:false});
-  if (saved) { items.unshift(saved); inp.value=''; renderList(); renderPills(); showToast('Added ✦'); getPhoto(catId); }
+  if (saved) {
+    items.unshift(saved);
+    inp.value = '';
+    renderList(); renderPills();
+    showToast('Added ✦');
+    getPhoto(catId);
+    // If today had no challenge set, this is now it
+    if (!cItemId) initToday();
+  }
 }
 
 function guessCat(title) {
@@ -740,9 +1091,8 @@ function renderList() {
   const pending = items.filter(i => !i.done);
   const done = items.filter(i => i.done);
 
-  document.getElementById('lCount').textContent = pending.length===1 ? '1 to try' : `${pending.length} to try`;
+  document.getElementById('lCount').textContent = pending.length === 1 ? '1 to try' : `${pending.length} to try`;
   document.getElementById('lEmpty').style.display = (pending.length===0 && done.length===0) ? 'block' : 'none';
-
   document.getElementById('lPending').innerHTML = pending.map(pendingHTML).join('');
 
   const journalEl = document.getElementById('journalSection');
@@ -753,7 +1103,6 @@ function renderList() {
     journalEl.style.display = 'none';
   }
 
-  // Load all images
   [...pending, ...done].forEach(item => {
     const cached = photos[item.cat];
     const el = document.getElementById(`img-${item.id}`);
@@ -769,15 +1118,16 @@ function renderList() {
 
 function pendingHTML(item) {
   const cat = CATS.find(c=>c.id===item.cat) || CATS[0];
+  const isActive = item.id === cItemId;
   return `
-  <div class="pitem" id="pitem-${item.id}" onclick="markDone('${item.id}')">
+  <div class="pitem${isActive?' highlight':''}" id="pitem-${item.id}" onclick="markDone('${item.id}')">
     <div class="pitem-img-wrap">
       <div class="pitem-img-fallback">${cat.emoji}</div>
       <img class="dim" id="img-${item.id}" alt="${item.title}">
     </div>
     <div class="pitem-body">
       <div class="pitem-title">${item.title}</div>
-      <div class="pitem-check-btn"><div class="pitem-check-circle"></div>Mark as done</div>
+      <div class="pitem-check-btn"><div class="pitem-check-circle"></div>${isActive ? 'Today\'s challenge' : 'Mark as done'}</div>
     </div>
   </div>`;
 }
@@ -786,9 +1136,7 @@ function doneHTML(item) {
   const cat = CATS.find(c=>c.id===item.cat) || CATS[0];
   const ref = reflections[item.id];
   const stars = ref ? Array.from({length:5},(_,i)=>`<span class="cstar ${i<ref.rating?'':'empty'}">★</span>`).join('') : '';
-  const note = ref?.note
-    ? `<div class="citem-note">${ref.note}</div>`
-    : `<div class="citem-note empty">No note yet — tap to add one.</div>`;
+  const note = ref?.note ? `<div class="citem-note">${ref.note}</div>` : `<div class="citem-note empty">No note yet — tap to add one.</div>`;
   const date = ref ? new Date(ref.created_at).toLocaleDateString('en-GB',{day:'numeric',month:'short'}) : '';
   return `
   <div class="citem" onclick="openModal('${item.id}',true)">
@@ -814,7 +1162,8 @@ async function markDone(id) {
   item.done = true;
   await dbUpdate(id, {done:true});
   celebrate(id);
-  justCompletedId = id;
+  // If this was today's challenge, mark done
+  if (id === cItemId) { cDone = true; saveCache(); renderToday(); }
   renderList(); renderPills();
   setTimeout(() => openModal(id, false), 600);
 }
@@ -823,26 +1172,21 @@ async function markDone(id) {
 function celebrate(itemId) {
   const el = document.getElementById(`pitem-${itemId}`);
   const rect = el ? el.getBoundingClientRect() : {top:window.innerHeight/2, left:window.innerWidth/2, width:0, height:0};
-  const cx = rect.left + rect.width/2;
-  const cy = rect.top + rect.height/2;
-
+  const cx = rect.left + rect.width/2, cy = rect.top + rect.height/2;
   const wrap = document.createElement('div');
   wrap.className = 'confetti-wrap';
   document.body.appendChild(wrap);
-
   const colors = ['#c8952a','#f5d98a','#e8b84b','#ffffff','#2d6a4f','#7da87d'];
   for (let i=0; i<32; i++) {
     const p = document.createElement('div');
     p.className = 'confetti-piece';
     const angle = Math.random() * 360;
     const dist = 60 + Math.random()*90;
-    const dx = Math.cos(angle*Math.PI/180) * dist;
-    const dy = Math.sin(angle*Math.PI/180) * dist - 90;
     p.style.cssText = `left:${cx}px;top:${cy}px;background:${colors[Math.floor(Math.random()*colors.length)]};width:${6+Math.random()*6}px;height:${6+Math.random()*6}px;border-radius:${Math.random()>.5?'50%':'2px'};`;
     wrap.appendChild(p);
     requestAnimationFrame(() => requestAnimationFrame(() => {
       p.style.transition = `transform ${0.9+Math.random()*.5}s cubic-bezier(.2,.8,.3,1), opacity 0.3s ${0.65+Math.random()*.3}s ease`;
-      p.style.transform = `translate(${dx}px,${dy}px) rotate(${Math.random()*720}deg) scale(0.2)`;
+      p.style.transform = `translate(${Math.cos(angle*Math.PI/180)*(dist)}px,${Math.sin(angle*Math.PI/180)*dist-90}px) rotate(${Math.random()*720}deg) scale(0.2)`;
       p.style.opacity = '0';
     }));
   }
@@ -855,53 +1199,46 @@ function openModal(id, isEdit) {
   const item = items.find(i => i.id===id); if (!item) return;
   const cat = CATS.find(c => c.id===item.cat) || CATS[0];
   const ref = reflections[id];
-
   document.getElementById('mTitle').textContent = item.title;
   document.getElementById('mCat').textContent = cat.label;
   document.getElementById('mFe').textContent = cat.emoji;
   document.getElementById('mQ').textContent = isEdit ? 'Edit your reflection' : 'How was it?';
   document.getElementById('mNote').value = ref?.note || '';
-
   if (ref?.rating) {
     modalRating = ref.rating;
     document.querySelectorAll('.mstar').forEach((s,i) => s.classList.toggle('lit', i < ref.rating));
   } else {
     document.querySelectorAll('.mstar').forEach(s => s.classList.remove('lit'));
   }
-
   const saveBtn = document.getElementById('mSave');
   saveBtn.textContent = isEdit ? 'Update reflection' : 'Save reflection';
   saveBtn.classList.toggle('gold', !isEdit);
-
   const mp = document.getElementById('mPhoto'), cached = photos[item.cat];
   if (cached) { mp.src=cached; mp.style.display='block'; } else mp.style.display='none';
-
   document.getElementById('modalBg').classList.add('on');
 }
 
-function closeModal() {
-  document.getElementById('modalBg').classList.remove('on');
-  modalId = null; modalRating = 0;
-}
-
+function closeModal() { document.getElementById('modalBg').classList.remove('on'); modalId=null; modalRating=0; }
 function bgClick(e) { if (e.target===document.getElementById('modalBg')) closeModal(); }
 function setStar(v) { modalRating=v; document.querySelectorAll('.mstar').forEach((s,i)=>s.classList.toggle('lit',i<v)); }
 
 async function saveRef() {
   if (!modalId) { closeModal(); return; }
-  const savedId = modalId;
-  const wasEdit = modalIsEdit;
+  const savedId = modalId, wasEdit = modalIsEdit;
   const note = document.getElementById('mNote').value.trim();
   const rating = modalRating || 3;
   await dbSaveRef(savedId, rating, note);
   closeModal();
   renderList();
   showToast(wasEdit ? 'Reflection updated ✦' : 'Reflection saved ✦');
-
-  // FIX 4: Auto-advance to next pending item after saving new reflection
   if (!wasEdit) {
-    const nextPending = items.filter(i => !i.done && i.id !== savedId);
+    // Auto-advance to next pending item
+    const nextPending = items.filter(i => !i.done);
     if (nextPending.length > 0) {
+      // Set next day's challenge
+      cItemId = nextPending[0].id;
+      cDone = false;
+      saveCache();
       showPage('list');
       setTimeout(() => {
         const nextEl = document.getElementById(`pitem-${nextPending[0].id}`);
@@ -911,17 +1248,17 @@ async function saveRef() {
           setTimeout(() => nextEl.classList.remove('highlight'), 2500);
         }
       }, 400);
+    } else {
+      renderEmptyToday();
     }
   }
 }
 
-// FIX 4: Skip also auto-advances
 function skipReflection() {
-  const savedId = modalId;
   const wasEdit = modalIsEdit;
   closeModal();
   if (!wasEdit) {
-    const nextPending = items.filter(i => !i.done && i.id !== savedId);
+    const nextPending = items.filter(i => !i.done);
     if (nextPending.length > 0) {
       showPage('list');
       setTimeout(() => {
