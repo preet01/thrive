@@ -9,33 +9,34 @@
 <style>
 :root {
   --bg: #f7f5f0;
-  --white: #ffffff;
+  --white: #fff;
   --ink: #1c1c1a;
   --ink2: #5a5a54;
   --ink3: #a8a89a;
-  --ink4: #dddcd7;
+  --ink4: #e0deda;
   --accent: #2d6a4f;
-  --shadow: 0 2px 20px rgba(0,0,0,0.07);
-  --radius: 16px;
+  --gold: #c8952a;
+  --gold-l: #fdf3e0;
+  --gold-m: #f5d98a;
+  --shadow: 0 2px 24px rgba(0,0,0,0.08);
+  --shadow-gold: 0 4px 32px rgba(200,149,42,0.22);
+  --r: 18px;
 }
 * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
 html, body { height: 100%; font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--ink); overflow: hidden; }
 body { max-width: 430px; margin: 0 auto; }
 
-/* ── LOADING ── */
+/* ─── LOADING ─────────────────────── */
 #loading {
   position: fixed; inset: 0; max-width: 430px; margin: 0 auto;
   background: var(--bg); display: flex; align-items: center; justify-content: center;
-  z-index: 3000; transition: opacity 0.4s ease;
+  z-index: 3000; transition: opacity 0.5s ease;
 }
 #loading.gone { opacity: 0; pointer-events: none; }
-.loading-logo {
-  font-family: 'Lora', serif; font-style: italic; font-size: 38px; color: var(--ink);
-  animation: fadeUp 0.7s 0.1s both;
-}
-@keyframes fadeUp { from { opacity:0; transform:translateY(12px); } to { opacity:1; transform:translateY(0); } }
+.loading-logo { font-family:'Lora',serif; font-style:italic; font-size:40px; color:var(--ink); animation: fu 0.7s 0.1s both; }
+@keyframes fu { from{opacity:0;transform:translateY(14px)} to{opacity:1;transform:translateY(0)} }
 
-/* ── AUTH ── */
+/* ─── AUTH ────────────────────────── */
 #auth {
   position: fixed; inset: 0; max-width: 430px; margin: 0 auto;
   background: var(--bg); display: flex; flex-direction: column;
@@ -44,316 +45,388 @@ body { max-width: 430px; margin: 0 auto; }
 #auth.gone { opacity: 0; pointer-events: none; }
 
 .auth-hero {
-  height: 200px; position: relative; flex-shrink: 0; overflow: hidden;
-  background: linear-gradient(180deg, #b8dde8 0%, #c8e4d0 40%, #8aad7a 70%, #3a6248 100%);
+  height: 210px; position: relative; flex-shrink: 0; overflow: hidden;
+  background: linear-gradient(180deg,#a8ccd8 0%,#b8d8c0 40%,#7aa070 70%,#3a5e40 100%);
 }
-.auth-hero-fade {
-  position: absolute; inset: 0;
-  background: linear-gradient(to bottom, transparent 30%, var(--bg) 100%);
+.auth-fade { position:absolute;inset:0;background:linear-gradient(to bottom,transparent 25%,var(--bg) 100%); }
+.auth-logo { position:absolute;bottom:16px;left:24px;font-family:'Lora',serif;font-style:italic;font-size:32px;color:rgba(255,255,255,.95);text-shadow:0 1px 12px rgba(0,0,0,.22); }
+
+.auth-body { flex:1;padding:8px 26px 44px;overflow-y:auto; }
+.auth-headline { font-family:'Lora',serif;font-style:italic;font-size:18px;color:var(--ink);margin-bottom:5px;line-height:1.4; }
+.auth-sub { font-size:12px;color:var(--ink3);margin-bottom:24px;font-weight:300;line-height:1.6; }
+
+.auth-tabs { display:flex;border-bottom:1px solid var(--ink4);margin-bottom:20px; }
+.auth-tab { flex:1;background:none;border:none;border-bottom:2px solid transparent;margin-bottom:-1px;padding:10px 0;font-family:'DM Sans',sans-serif;font-size:13px;font-weight:500;color:var(--ink3);cursor:pointer;transition:all .2s; }
+.auth-tab.on { color:var(--ink);border-bottom-color:var(--ink); }
+
+.auth-form { display:flex;flex-direction:column;gap:12px; }
+.auth-form.hide { display:none; }
+.field-lbl { display:block;font-size:10px;letter-spacing:1px;text-transform:uppercase;color:var(--ink3);font-weight:500;margin-bottom:4px; }
+.auth-input { width:100%;background:var(--white);border:1px solid var(--ink4);border-radius:12px;padding:13px 14px;font-family:'DM Sans',sans-serif;font-size:14px;color:var(--ink);outline:none;transition:border-color .2s; }
+.auth-input:focus { border-color:var(--ink3); }
+.auth-btn { background:var(--ink);color:var(--bg);border:none;border-radius:14px;padding:15px;font-family:'DM Sans',sans-serif;font-size:14px;font-weight:500;cursor:pointer;transition:all .18s;margin-top:4px; }
+.auth-btn:active { transform:scale(.97); }
+.auth-btn:disabled { opacity:.5;pointer-events:none; }
+.auth-msg { font-size:12px;border-radius:10px;padding:10px 13px;display:none;line-height:1.5; }
+.auth-msg.show { display:block; }
+.auth-msg.err { color:#b03030;background:#fdf0ee; }
+.auth-msg.ok  { color:var(--accent);background:#e8f3ed; }
+
+/* ─── APP SHELL ───────────────────── */
+.app { display:flex;flex-direction:column;height:100vh;height:100dvh;overflow:hidden;position:relative; }
+
+.page { position:absolute;inset:0;display:flex;flex-direction:column;opacity:0;pointer-events:none;transform:translateY(10px);transition:opacity .26s ease,transform .26s ease;overflow:hidden; }
+.page.on { opacity:1;pointer-events:all;transform:translateY(0); }
+
+/* ─── NAV ─────────────────────────── */
+.bnav {
+  position:fixed;bottom:0;left:50%;transform:translateX(-50%);
+  width:100%;max-width:430px;
+  background:rgba(247,245,240,.96);backdrop-filter:blur(18px);
+  border-top:1px solid var(--ink4);
+  display:flex;padding:10px 0 max(16px,env(safe-area-inset-bottom));
+  z-index:200;
 }
-.auth-logo-big {
-  position: absolute; bottom: 18px; left: 24px;
-  font-family: 'Lora', serif; font-style: italic; font-size: 30px;
-  color: rgba(255,255,255,0.95); text-shadow: 0 1px 10px rgba(0,0,0,0.2);
-}
+.nb { flex:1;display:flex;flex-direction:column;align-items:center;gap:4px;background:none;border:none;cursor:pointer;padding:4px 0;transition:all .2s; }
+.nb .ni { font-size:20px;line-height:1;transition:transform .2s; }
+.nb .nl { font-size:9px;letter-spacing:1px;text-transform:uppercase;color:var(--ink4);font-weight:500;transition:color .2s; }
+.nb.on .nl { color:var(--ink); }
+.nb.on .ni { transform:scale(1.12); }
 
-.auth-body { flex: 1; padding: 6px 26px 40px; overflow-y: auto; }
+/* ══════════════════════════════════════
+   TODAY SCREEN
+══════════════════════════════════════ */
+#page-today { background:var(--ink); }
 
-.auth-tagline {
-  font-family: 'Lora', serif; font-style: italic;
-  font-size: 17px; color: var(--ink); margin-bottom: 5px; line-height: 1.4;
-}
-.auth-sub { font-size: 12px; color: var(--ink3); margin-bottom: 24px; font-weight: 300; line-height: 1.6; }
-
-.auth-tabs { display: flex; border-bottom: 1px solid var(--ink4); margin-bottom: 20px; }
-.auth-tab {
-  flex: 1; background: none; border: none;
-  border-bottom: 2px solid transparent; margin-bottom: -1px;
-  padding: 10px 0; font-family: 'DM Sans', sans-serif;
-  font-size: 13px; font-weight: 500; color: var(--ink3);
-  cursor: pointer; transition: all 0.2s;
-}
-.auth-tab.on { color: var(--ink); border-bottom-color: var(--ink); }
-
-.auth-form { display: flex; flex-direction: column; gap: 11px; }
-.auth-form.hide { display: none; }
-
-.field-label { font-size: 10px; letter-spacing: 1px; text-transform: uppercase; color: var(--ink3); font-weight: 500; margin-bottom: 4px; display: block; }
-
-.auth-input {
-  width: 100%; background: var(--white); border: 1px solid var(--ink4);
-  border-radius: 12px; padding: 13px 14px;
-  font-family: 'DM Sans', sans-serif; font-size: 14px; color: var(--ink);
-  outline: none; transition: border-color 0.2s;
-}
-.auth-input:focus { border-color: var(--ink3); }
-
-.auth-btn {
-  background: var(--ink); color: var(--bg); border: none;
-  border-radius: 14px; padding: 15px;
-  font-family: 'DM Sans', sans-serif; font-size: 14px; font-weight: 500;
-  cursor: pointer; transition: all 0.18s; margin-top: 4px; letter-spacing: 0.2px;
-}
-.auth-btn:active { transform: scale(0.97); }
-.auth-btn:disabled { opacity: 0.5; pointer-events: none; }
-
-.auth-msg {
-  font-size: 12px; border-radius: 10px; padding: 10px 13px;
-  display: none; line-height: 1.5;
-}
-.auth-msg.show { display: block; }
-.auth-msg.err { color: #b03030; background: #fdf0ee; }
-.auth-msg.ok  { color: var(--accent); background: #e8f3ed; }
-
-/* ── APP ── */
-.app { display: flex; flex-direction: column; height: 100vh; height: 100dvh; overflow: hidden; position: relative; }
-
-.page {
-  position: absolute; inset: 0; display: flex; flex-direction: column;
-  opacity: 0; pointer-events: none;
-  transform: translateY(10px);
-  transition: opacity 0.25s ease, transform 0.25s ease;
+/* Full-bleed hero — takes up top 55% of screen */
+.hero {
+  position: relative;
+  height: 58vh;
+  flex-shrink: 0;
   overflow: hidden;
 }
-.page.on { opacity: 1; pointer-events: all; transform: translateY(0); }
 
-/* ── NAV ── */
-.bottom-nav {
-  position: fixed; bottom: 0; left: 50%; transform: translateX(-50%);
-  width: 100%; max-width: 430px;
-  background: rgba(247,245,240,0.96);
-  backdrop-filter: blur(16px);
-  border-top: 1px solid var(--ink4);
-  display: flex; padding: 10px 0 max(16px, env(safe-area-inset-bottom));
-  z-index: 200;
-}
-.nav-btn {
-  flex: 1; display: flex; flex-direction: column; align-items: center; gap: 4px;
-  background: none; border: none; cursor: pointer; padding: 4px 0; transition: all 0.2s;
-}
-.nav-btn .ni { font-size: 20px; line-height: 1; transition: transform 0.2s; }
-.nav-btn .nl { font-size: 9px; letter-spacing: 1px; text-transform: uppercase; color: var(--ink4); font-weight: 500; transition: color 0.2s; }
-.nav-btn.on .nl { color: var(--ink); }
-.nav-btn.on .ni { transform: scale(1.1); }
-
-/* ── TODAY ── */
-.hero-wrap { position: relative; height: 255px; flex-shrink: 0; overflow: hidden; }
-.hero-photo { width: 100%; height: 100%; object-fit: cover; display: block; transition: opacity 0.7s ease; }
-.hero-photo.dim { opacity: 0; }
-.hero-fallback {
-  position: absolute; inset: 0; transition: opacity 0.3s;
-}
-.hf-nature  { background: linear-gradient(180deg,#b8dde8 0%,#c8e4d0 40%,#8aad7a 70%,#3a6248 100%); }
-.hf-arts    { background: linear-gradient(180deg,#e8d8c8 0%,#d4b898 40%,#c09878 70%,#8a6848 100%); }
-.hf-food    { background: linear-gradient(180deg,#f0e0c8 0%,#e8c89a 40%,#d4a870 70%,#b88848 100%); }
-.hf-fitness { background: linear-gradient(180deg,#c8d8e8 0%,#a8c0d0 40%,#7898b0 70%,#486880 100%); }
-.hf-social  { background: linear-gradient(180deg,#e8e0d8 0%,#d8c8b8 40%,#c0a890 70%,#a08870 100%); }
-.hf-wellness{ background: linear-gradient(180deg,#c8e0e8 0%,#a8c8d8 40%,#88b0c0 70%,#608090 100%); }
-
-.hero-fade {
+.hero-photo {
   position: absolute; inset: 0;
-  background: linear-gradient(to bottom,rgba(247,245,240,0) 0%,rgba(247,245,240,0) 44%,rgba(247,245,240,.5) 68%,rgba(247,245,240,1) 100%);
+  width: 100%; height: 100%;
+  object-fit: cover;
+  transition: opacity 1s ease;
 }
-.hero-bar {
+.hero-photo.dim { opacity: 0; }
+
+/* Rich CSS fallback scenes */
+.hero-fallback { position:absolute;inset:0; }
+.hf-nature  { background:linear-gradient(170deg,#4a8060 0%,#2d5e3a 30%,#1a3d28 60%,#0d2418 100%); }
+.hf-arts    { background:linear-gradient(170deg,#8b5a3c 0%,#6b3e28 30%,#4a2a1a 60%,#2a1510 100%); }
+.hf-food    { background:linear-gradient(170deg,#c8783a 0%,#a85828 30%,#7a3c18 60%,#4a2008 100%); }
+.hf-fitness { background:linear-gradient(170deg,#3a6888 0%,#2a4e6a 30%,#1a3450 60%,#0a1e34 100%); }
+.hf-social  { background:linear-gradient(170deg,#7a6050 0%,#5a4038 30%,#3a2820 60%,#1a1008 100%); }
+.hf-wellness{ background:linear-gradient(170deg,#4a7880 0%,#2a5860 30%,#1a3840 60%,#0a2028 100%); }
+
+/* Dark gradient bottom so text is always readable */
+.hero-gradient {
+  position: absolute; inset: 0;
+  background: linear-gradient(
+    to bottom,
+    rgba(0,0,0,0.1) 0%,
+    rgba(0,0,0,0) 30%,
+    rgba(0,0,0,0.3) 60%,
+    rgba(0,0,0,0.85) 100%
+  );
+}
+
+.hero-topbar {
   position: absolute; top: 0; left: 0; right: 0;
   display: flex; justify-content: space-between; align-items: center;
-  padding: 46px 20px 10px; z-index: 5;
-}
-.hero-logo { font-family:'Lora',serif; font-style:italic; font-size:22px; color:rgba(255,255,255,.95); text-shadow:0 1px 10px rgba(0,0,0,.22); }
-.hero-right { display:flex; align-items:center; gap:10px; }
-.hero-date { font-size:11px; color:rgba(255,255,255,.7); letter-spacing:.5px; }
-.signout-btn {
-  font-size:10px; color:rgba(255,255,255,.65); background:rgba(255,255,255,.15);
-  border:none; border-radius:8px; padding:4px 9px; cursor:pointer;
-  font-family:'DM Sans',sans-serif; letter-spacing:.3px; backdrop-filter:blur(8px);
+  padding: max(48px, env(safe-area-inset-top) + 14px) 20px 12px;
+  z-index: 5;
 }
 
-.today-body { flex:1; overflow-y:auto; padding:12px 20px 100px; -webkit-overflow-scrolling:touch; }
-.today-body::-webkit-scrollbar { display:none; }
+.hero-logo { font-family:'Lora',serif;font-style:italic;font-size:22px;color:rgba(255,255,255,.95);text-shadow:0 1px 12px rgba(0,0,0,.4); }
+.hero-right { display:flex;align-items:center;gap:10px; }
+.hero-date { font-size:11px;color:rgba(255,255,255,.65);letter-spacing:.5px; }
+.signout { font-size:10px;color:rgba(255,255,255,.55);background:rgba(255,255,255,.12);border:none;border-radius:8px;padding:4px 9px;cursor:pointer;font-family:'DM Sans',sans-serif;backdrop-filter:blur(8px); }
+
+/* Challenge content overlaid on bottom of hero */
+.hero-content {
+  position: absolute; bottom: 0; left: 0; right: 0;
+  padding: 24px 22px 28px;
+  z-index: 5;
+}
 
 .ctag {
-  display:flex; align-items:center; gap:6px;
-  font-size:9px; letter-spacing:2px; text-transform:uppercase;
-  color:var(--accent); margin-bottom:7px; font-weight:500;
+  display: flex; align-items: center; gap: 7px;
+  font-size: 9px; letter-spacing: 2.5px; text-transform: uppercase;
+  color: rgba(255,255,255,.65); margin-bottom: 10px; font-weight: 500;
 }
-.ctag-dot { width:6px; height:6px; border-radius:50%; flex-shrink:0; }
+.ctag-dot { width:5px;height:5px;border-radius:50%;background:rgba(255,255,255,.65); }
 
-.ctitle { font-family:'Lora',serif; font-size:21px; font-style:italic; color:var(--ink); line-height:1.35; margin-bottom:7px; }
-.cdesc { font-size:13px; color:var(--ink3); line-height:1.65; margin-bottom:18px; font-weight:300; }
-
-.cactions { display:flex; gap:10px; margin-bottom:26px; }
-.btn-done {
-  flex:1; background:var(--ink); color:var(--bg); border:none; border-radius:14px;
-  padding:14px 18px; font-family:'DM Sans',sans-serif; font-size:14px; font-weight:500;
-  cursor:pointer; transition:all .18s; letter-spacing:.2px;
+.ctitle {
+  font-family: 'Lora', serif;
+  font-size: 24px; font-style: italic; font-weight: 400;
+  color: #fff; line-height: 1.3; margin-bottom: 6px;
+  text-shadow: 0 1px 16px rgba(0,0,0,.3);
 }
-.btn-done:active { transform:scale(.97); opacity:.85; }
-.btn-done.done { background:var(--accent); }
-.btn-skip {
-  width:50px; background:var(--white); border:1px solid var(--ink4);
-  border-radius:14px; font-size:17px; cursor:pointer;
-  display:flex; align-items:center; justify-content:center; flex-shrink:0; transition:all .18s;
-}
-.btn-skip:active { transform:scale(.95); }
 
-.divider { border:none; border-top:1px solid var(--ink4); margin-bottom:16px; }
-.sec-label { font-size:9px; letter-spacing:2px; text-transform:uppercase; color:var(--ink4); margin-bottom:11px; font-weight:500; }
-
-.list-pills { display:flex; gap:8px; flex-wrap:wrap; }
-.lpill {
-  display:flex; align-items:center; gap:7px; background:var(--white);
-  border:1px solid var(--ink4); border-radius:20px; padding:7px 13px;
-  font-size:12px; color:var(--ink2); cursor:pointer;
+.cdesc {
+  font-size: 13px; color: rgba(255,255,255,.65);
+  line-height: 1.6; font-weight: 300; margin-bottom: 20px;
 }
-.lpill-dot { width:6px; height:6px; border-radius:50%; flex-shrink:0; }
-.pills-empty { font-size:13px; color:var(--ink3); font-style:italic; font-weight:300; }
 
-/* ── MY LIST ── */
-.lheader { padding:50px 20px 14px; border-bottom:1px solid var(--ink4); flex-shrink:0; background:var(--bg); }
-.lheader-top { display:flex; justify-content:space-between; align-items:baseline; margin-bottom:13px; }
-.lheader-top h2 { font-family:'Lora',serif; font-size:21px; font-style:italic; font-weight:400; color:var(--ink); }
-.lcount { font-size:12px; color:var(--ink3); background:var(--white); border:1px solid var(--ink4); padding:3px 10px; border-radius:20px; }
+.cbtns { display:flex;gap:10px; }
 
-.add-bar {
-  display:flex; align-items:center; gap:10px; background:var(--white);
-  border:1px solid var(--ink4); border-radius:14px; padding:10px 12px; box-shadow:var(--shadow);
+.btn-did {
+  flex: 1; background: rgba(255,255,255,.95); color: var(--ink);
+  border: none; border-radius: 14px; padding: 15px 20px;
+  font-family: 'DM Sans', sans-serif; font-size: 14px; font-weight: 500;
+  cursor: pointer; transition: all .2s; letter-spacing: .2px;
+  backdrop-filter: blur(8px);
 }
-.add-inp {
-  flex:1; background:none; border:none; outline:none;
-  font-family:'DM Sans',sans-serif; font-size:14px; color:var(--ink); font-weight:300;
+.btn-did:active { transform: scale(.97); }
+.btn-did.done { background: rgba(200,149,42,.9); color: #fff; }
+
+.btn-skip2 {
+  width: 52px; background: rgba(255,255,255,.12); border: 1px solid rgba(255,255,255,.2);
+  border-radius: 14px; font-size: 18px; color: rgba(255,255,255,.8);
+  cursor: pointer; display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0; transition: all .18s; backdrop-filter: blur(8px);
 }
+.btn-skip2:active { transform: scale(.95); }
+
+/* White card below hero */
+.today-card {
+  flex: 1; background: var(--bg);
+  padding: 20px 20px 100px;
+  overflow-y: auto; -webkit-overflow-scrolling: touch;
+}
+.today-card::-webkit-scrollbar { display: none; }
+
+.sec-label { font-size:9px;letter-spacing:2px;text-transform:uppercase;color:var(--ink4);margin-bottom:12px;font-weight:500; }
+
+.qpills { display:flex;gap:8px;flex-wrap:wrap; }
+.qpill {
+  display:flex;align-items:center;gap:7px;background:var(--white);
+  border:1px solid var(--ink4);border-radius:22px;padding:8px 14px;
+  font-size:12px;color:var(--ink2);cursor:pointer;transition:all .18s;
+  box-shadow: 0 1px 6px rgba(0,0,0,.04);
+}
+.qpill:active { background:var(--ink4); }
+.qp-dot { width:6px;height:6px;border-radius:50%;flex-shrink:0; }
+.pills-empty { font-size:13px;color:var(--ink3);font-style:italic;font-weight:300; }
+
+/* ══════════════════════════════════════
+   MY LIST SCREEN
+══════════════════════════════════════ */
+#page-list { background: var(--bg); }
+
+.lhead { padding:52px 20px 14px;border-bottom:1px solid var(--ink4);flex-shrink:0;background:var(--bg); }
+.lhead-top { display:flex;justify-content:space-between;align-items:baseline;margin-bottom:13px; }
+.lhead-top h2 { font-family:'Lora',serif;font-size:22px;font-style:italic;font-weight:400; }
+.lcount { font-size:12px;color:var(--ink3);background:var(--white);border:1px solid var(--ink4);padding:3px 11px;border-radius:20px; }
+
+.add-row {
+  display:flex;align-items:center;gap:10px;background:var(--white);
+  border:1px solid var(--ink4);border-radius:14px;padding:10px 12px;
+  box-shadow:var(--shadow);
+}
+.add-inp { flex:1;background:none;border:none;outline:none;font-family:'DM Sans',sans-serif;font-size:14px;color:var(--ink);font-weight:300; }
 .add-inp::placeholder { color:var(--ink4); }
-.add-go {
-  background:var(--ink); color:var(--bg); border:none; border-radius:10px;
-  padding:7px 14px; font-family:'DM Sans',sans-serif; font-size:12px; font-weight:500;
-  cursor:pointer; white-space:nowrap; flex-shrink:0; transition:all .18s;
-}
+.add-go { background:var(--ink);color:var(--bg);border:none;border-radius:10px;padding:8px 15px;font-family:'DM Sans',sans-serif;font-size:12px;font-weight:500;cursor:pointer;white-space:nowrap;flex-shrink:0;transition:all .18s; }
 .add-go:active { transform:scale(.96); }
 
-.cat-bar { display:flex; gap:6px; flex-wrap:wrap; padding:11px 20px; background:var(--bg); border-bottom:1px solid var(--ink4); flex-shrink:0; }
-.cchip {
-  padding:5px 12px; border-radius:20px; border:1px solid var(--ink4); background:var(--white);
-  font-size:11px; color:var(--ink2); cursor:pointer; font-family:'DM Sans',sans-serif;
-  display:flex; align-items:center; gap:5px; transition:all .18s;
-}
-.cchip.on { background:var(--ink); color:var(--bg); border-color:var(--ink); }
-
-.lscroll { flex:1; overflow-y:auto; padding:13px 20px 100px; -webkit-overflow-scrolling:touch; }
+.lscroll { flex:1;overflow-y:auto;padding:16px 20px 100px;-webkit-overflow-scrolling:touch; }
 .lscroll::-webkit-scrollbar { display:none; }
 
-.lsec { font-size:9px; letter-spacing:2px; text-transform:uppercase; color:var(--ink4); margin-bottom:9px; font-weight:500; }
+.lsec { font-size:9px;letter-spacing:2px;text-transform:uppercase;color:var(--ink4);margin-bottom:12px;font-weight:500; }
 
-.bitem {
-  display:flex; align-items:center; gap:13px; background:var(--white);
-  border-radius:var(--radius); padding:12px 14px; margin-bottom:8px;
-  box-shadow:var(--shadow); cursor:pointer; transition:all .2s;
-  animation:si .25s ease;
+/* ── PENDING ITEM — large card with image ── */
+.pitem {
+  background: var(--white);
+  border-radius: var(--r);
+  margin-bottom: 14px;
+  box-shadow: var(--shadow);
+  overflow: hidden;
+  cursor: pointer;
+  transition: transform .2s, box-shadow .2s;
+  animation: si .28s ease;
 }
-@keyframes si { from{opacity:0;transform:translateY(-8px)} to{opacity:1;transform:translateY(0)} }
-.bitem:active { transform:scale(.98); }
-.bitem.done { opacity:.38; box-shadow:none; }
-.bitem.done .ititle { text-decoration:line-through; }
+@keyframes si { from{opacity:0;transform:translateY(-10px)} to{opacity:1;transform:translateY(0)} }
+.pitem:active { transform: scale(.985); }
 
-.iimg-wrap { width:46px; height:46px; border-radius:12px; overflow:hidden; flex-shrink:0; background:var(--ink4); position:relative; }
-.iimg { width:100%; height:100%; object-fit:cover; display:block; transition:opacity .4s; }
-.iimg.dim { opacity:0; }
-.iimg-fallback { position:absolute; inset:0; display:flex; align-items:center; justify-content:center; font-size:20px; }
-
-.iinfo { flex:1; overflow:hidden; }
-.ititle { font-size:14px; font-weight:400; color:var(--ink); margin-bottom:3px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
-.imeta { display:flex; align-items:center; gap:5px; font-size:11px; color:var(--ink3); }
-.icat-dot { width:5px; height:5px; border-radius:50%; flex-shrink:0; }
-
-.icheck {
-  width:24px; height:24px; border-radius:50%; border:1.5px solid var(--ink4);
-  display:flex; align-items:center; justify-content:center;
-  flex-shrink:0; font-size:11px; color:transparent; transition:all .2s;
+/* Big image at top of card */
+.pitem-img {
+  width: 100%; height: 140px;
+  object-fit: cover; display: block;
+  background: var(--ink4);
+  transition: opacity .5s;
+  position: relative;
 }
-.bitem.done .icheck { background:var(--accent); border-color:var(--accent); color:#fff; }
+.pitem-img-wrap { position:relative;overflow:hidden;height:140px;background:var(--ink4); }
+.pitem-img-wrap img { position:absolute;inset:0;width:100%;height:100%;object-fit:cover;transition:opacity .5s; }
+.pitem-img-wrap img.dim { opacity:0; }
+.pitem-img-fallback { position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:44px; }
 
-.lempty { text-align:center; padding:60px 20px; color:var(--ink3); }
-.lempty .ei { font-size:40px; margin-bottom:14px; }
-.lempty p { font-size:14px; line-height:1.6; font-weight:300; font-style:italic; font-family:'Lora',serif; }
+.pitem-body { padding:14px 16px 16px; }
+.pitem-title { font-size:16px;font-weight:400;color:var(--ink);margin-bottom:8px;line-height:1.35; }
 
-/* ── MODAL ── */
+.pitem-footer { display:flex;align-items:center;justify-content:space-between; }
+.pitem-check-btn {
+  display: flex; align-items: center; gap: 8px;
+  background: var(--bg); border: 1.5px solid var(--ink4);
+  border-radius: 22px; padding: 7px 14px;
+  font-size: 12px; color: var(--ink2); font-weight: 500;
+  cursor: pointer; font-family:'DM Sans',sans-serif; transition: all .2s;
+}
+.pitem-check-btn:active { background: var(--ink4); }
+.pitem-check-circle { width:16px;height:16px;border-radius:50%;border:1.5px solid var(--ink3);flex-shrink:0; }
+
+/* ── COMPLETED ITEM — gold trophy card ── */
+.citem {
+  background: var(--white);
+  border-radius: var(--r);
+  margin-bottom: 14px;
+  box-shadow: var(--shadow-gold);
+  border: 1.5px solid rgba(200,149,42,.2);
+  overflow: hidden;
+  cursor: pointer;
+  transition: all .2s;
+  position: relative;
+}
+
+/* Gold shimmer top bar */
+.citem::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 3px;
+  background: linear-gradient(90deg, #c8952a, #f5d98a, #c8952a);
+  background-size: 200% 100%;
+  animation: goldShimmer 3s ease infinite;
+}
+
+@keyframes goldShimmer {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
+.citem-img-wrap { position:relative;overflow:hidden;height:120px;background:var(--ink4); }
+.citem-img-wrap img { position:absolute;inset:0;width:100%;height:100%;object-fit:cover;transition:opacity .5s; }
+.citem-img-wrap img.dim { opacity:0; }
+.citem-img-fallback { position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:38px; }
+
+/* Gold tint overlay on completed images */
+.citem-img-overlay {
+  position: absolute; inset: 0;
+  background: linear-gradient(to bottom, rgba(200,149,42,.08) 0%, rgba(200,149,42,.2) 100%);
+}
+
+.citem-body { padding:14px 16px 16px; }
+
+.citem-header { display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:8px; }
+.citem-title { font-size:15px;font-weight:400;color:var(--ink);line-height:1.35;flex:1; }
+
+.trophy { font-size:18px;margin-left:8px;flex-shrink:0; }
+
+/* Star display */
+.citem-stars { display:flex;gap:3px;margin-bottom:8px; }
+.cstar { font-size:14px;color:var(--gold-m); }
+.cstar.empty { color:var(--ink4); }
+
+/* Journal note */
+.citem-note {
+  font-size:13px;color:var(--ink2);line-height:1.55;
+  font-weight:300;font-style:italic;
+  border-left:2px solid var(--gold-m);
+  padding-left:10px;
+  margin-bottom:10px;
+}
+.citem-note.empty { color:var(--ink4);font-style:italic; }
+
+.citem-date { font-size:10px;color:var(--ink3);letter-spacing:.3px; }
+
+.citem-edit-btn {
+  display:inline-flex;align-items:center;gap:5px;
+  font-size:11px;color:var(--gold);font-weight:500;
+  background:var(--gold-l);border:1px solid rgba(200,149,42,.2);
+  border-radius:20px;padding:5px 12px;cursor:pointer;
+  font-family:'DM Sans',sans-serif;transition:all .18s;margin-top:6px;
+}
+.citem-edit-btn:active { background:var(--gold-m); }
+
+/* ── CELEBRATION BURST ── */
+.confetti-wrap {
+  position: fixed; inset: 0; pointer-events: none; z-index: 999;
+  display: flex; align-items: center; justify-content: center;
+}
+.confetti-piece {
+  position: absolute;
+  width: 8px; height: 8px;
+  border-radius: 2px;
+  animation: confettiFall 1.2s ease forwards;
+}
+@keyframes confettiFall {
+  0%   { transform: translateY(0) rotate(0deg) scale(1); opacity: 1; }
+  80%  { opacity: 1; }
+  100% { transform: translateY(220px) rotate(720deg) scale(.4); opacity: 0; }
+}
+
+/* empty state */
+.lempty { text-align:center;padding:60px 20px;color:var(--ink3); }
+.lempty .ei { font-size:40px;margin-bottom:14px; }
+.lempty p { font-size:14px;line-height:1.6;font-weight:300;font-style:italic;font-family:'Lora',serif; }
+
+/* journal empty */
+.j-empty { text-align:center;padding:24px 20px;color:var(--ink4);font-size:13px;font-style:italic;font-weight:300;font-family:'Lora',serif; }
+
+/* ── REFLECTION MODAL ── */
 .modal-bg {
-  position:fixed; inset:0; background:rgba(28,28,26,0);
-  z-index:500; display:flex; align-items:flex-end; justify-content:center;
-  pointer-events:none; transition:background .3s ease;
+  position:fixed;inset:0;background:rgba(28,28,26,0);
+  z-index:500;display:flex;align-items:flex-end;justify-content:center;
+  pointer-events:none;transition:background .3s ease;
 }
-.modal-bg.on { background:rgba(28,28,26,.48); pointer-events:all; }
-
+.modal-bg.on { background:rgba(28,28,26,.52);pointer-events:all; }
 .modal-sheet {
-  width:100%; max-width:430px; background:var(--white);
+  width:100%;max-width:430px;background:var(--white);
   border-radius:26px 26px 0 0;
   padding:0 22px max(28px,env(safe-area-inset-bottom));
-  box-shadow:0 -8px 48px rgba(0,0,0,.18);
+  box-shadow:0 -10px 60px rgba(0,0,0,.2);
   transform:translateY(100%);
   transition:transform .35s cubic-bezier(.32,.72,0,1);
 }
 .modal-bg.on .modal-sheet { transform:translateY(0); }
+.mhandle { width:36px;height:4px;background:var(--ink4);border-radius:2px;margin:14px auto 20px; }
 
-.mhandle { width:36px; height:4px; background:var(--ink4); border-radius:2px; margin:14px auto 20px; }
+/* Gold accent on modal when completing */
+.modal-sheet.gold-mode { border-top:3px solid var(--gold-m); }
 
-.mpreview {
-  display:flex; align-items:center; gap:13px; background:var(--bg);
-  border-radius:14px; padding:12px 14px; margin-bottom:20px;
-}
-.mimg {
-  width:44px; height:44px; border-radius:11px; overflow:hidden;
-  flex-shrink:0; background:var(--ink4); position:relative;
-}
-.mimg img { width:100%; height:100%; object-fit:cover; display:block; }
-.mimg .mfe { position:absolute; inset:0; display:flex; align-items:center; justify-content:center; font-size:20px; }
+.mpreview { display:flex;align-items:center;gap:13px;background:var(--bg);border-radius:14px;padding:12px 14px;margin-bottom:20px; }
+.mpreview-img { width:52px;height:52px;border-radius:13px;overflow:hidden;flex-shrink:0;background:var(--ink4);position:relative; }
+.mpreview-img img { width:100%;height:100%;object-fit:cover;display:block; }
+.mpreview-img .mfe { position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:24px; }
+.mptitle { font-size:15px;font-weight:400;color:var(--ink);margin-bottom:3px; }
+.mpcat { font-size:11px;color:var(--ink3); }
 
-.mtitle { font-size:15px; font-weight:400; color:var(--ink); margin-bottom:3px; }
-.mcat { display:flex; align-items:center; gap:5px; font-size:11px; color:var(--ink3); }
-.mcat-dot { width:5px; height:5px; border-radius:50%; flex-shrink:0; }
+.mq { font-family:'Lora',serif;font-size:19px;font-style:italic;color:var(--ink);margin-bottom:3px; }
+.msub { font-size:12px;color:var(--ink3);margin-bottom:18px;font-weight:300; }
 
-.mq { font-family:'Lora',serif; font-size:18px; font-style:italic; color:var(--ink); margin-bottom:3px; }
-.msub { font-size:12px; color:var(--ink3); margin-bottom:16px; font-weight:300; }
+.stars-row { display:flex;gap:10px;margin-bottom:18px; }
+.mstar { font-size:34px;background:none;border:none;cursor:pointer;color:var(--ink4);transition:all .15s;padding:0;line-height:1; }
+.mstar.lit { color:#e8b84b; }
+.mstar:active { transform:scale(1.25); }
 
-.stars { display:flex; gap:8px; margin-bottom:16px; }
-.star {
-  font-size:32px; background:none; border:none; cursor:pointer;
-  color:var(--ink4); transition:all .15s; padding:0; line-height:1;
-}
-.star.lit { color:#e8b84b; }
-.star:active { transform:scale(1.22); }
-
-.mnote {
-  width:100%; background:var(--bg); border:1px solid var(--ink4);
-  border-radius:14px; padding:13px 14px;
-  font-family:'DM Sans',sans-serif; font-size:13px; color:var(--ink);
-  resize:none; height:76px; outline:none; margin-bottom:14px;
-  font-weight:300; line-height:1.6; transition:border-color .2s;
-}
-.mnote::placeholder { color:var(--ink4); font-style:italic; }
+.mnote { width:100%;background:var(--bg);border:1px solid var(--ink4);border-radius:14px;padding:13px 14px;font-family:'DM Sans',sans-serif;font-size:13px;color:var(--ink);resize:none;height:88px;outline:none;margin-bottom:16px;font-weight:300;line-height:1.6;transition:border-color .2s; }
+.mnote::placeholder { color:var(--ink4);font-style:italic; }
 .mnote:focus { border-color:var(--ink3); }
 
-.mactions { display:flex; gap:10px; }
-.msave {
-  flex:1; background:var(--ink); color:var(--bg); border:none;
-  border-radius:14px; padding:14px; font-family:'DM Sans',sans-serif;
-  font-size:14px; font-weight:500; cursor:pointer; transition:all .18s;
-}
+.mactions { display:flex;gap:10px; }
+.msave { flex:1;background:var(--ink);color:var(--bg);border:none;border-radius:14px;padding:14px;font-family:'DM Sans',sans-serif;font-size:14px;font-weight:500;cursor:pointer;transition:all .18s; }
 .msave:active { transform:scale(.97); }
-.mskip {
-  background:var(--bg); color:var(--ink3); border:1px solid var(--ink4);
-  border-radius:14px; padding:14px 18px; font-family:'DM Sans',sans-serif;
-  font-size:14px; cursor:pointer;
-}
+.msave.gold { background:linear-gradient(135deg,#c8952a,#e8b84b); }
+.mcancel { background:var(--bg);color:var(--ink3);border:1px solid var(--ink4);border-radius:14px;padding:14px 18px;font-family:'DM Sans',sans-serif;font-size:14px;cursor:pointer; }
 
 /* ── TOAST ── */
-.toast {
-  position:fixed; top:58px; left:50%;
-  transform:translateX(-50%) translateY(-18px);
-  background:var(--ink); color:var(--bg);
-  padding:10px 20px; border-radius:20px;
-  font-size:13px; z-index:1000; opacity:0;
-  transition:all .25s ease; white-space:nowrap; pointer-events:none;
-}
-.toast.show { opacity:1; transform:translateX(-50%) translateY(0); }
+.toast { position:fixed;top:58px;left:50%;transform:translateX(-50%) translateY(-18px);background:var(--ink);color:var(--bg);padding:10px 22px;border-radius:20px;font-size:13px;z-index:1000;opacity:0;transition:all .25s ease;white-space:nowrap;pointer-events:none; }
+.toast.show { opacity:1;transform:translateX(-50%) translateY(0); }
 </style>
 </head>
 <body>
@@ -363,28 +436,23 @@ body { max-width: 430px; margin: 0 auto; }
 
 <!-- AUTH -->
 <div id="auth">
-  <div class="auth-hero">
-    <div class="auth-hero-fade"></div>
-    <div class="auth-logo-big">Thrive</div>
-  </div>
+  <div class="auth-hero"><div class="auth-fade"></div><div class="auth-logo">Thrive</div></div>
   <div class="auth-body">
-    <div class="auth-tagline">Discover what you truly enjoy.</div>
-    <div class="auth-sub">Daily challenges, a personal bucket list, and a space to reflect on what lights you up.</div>
+    <div class="auth-headline">Discover what you truly enjoy.</div>
+    <div class="auth-sub">Daily challenges, a personal bucket list, and a space to reflect.</div>
     <div class="auth-tabs">
       <button class="auth-tab on" onclick="switchTab('in')">Sign in</button>
       <button class="auth-tab" onclick="switchTab('up')">Create account</button>
     </div>
-
     <form class="auth-form" id="fIn" onsubmit="doLogin(event)">
-      <div><label class="field-label">Email</label><input class="auth-input" id="inEmail" type="email" placeholder="you@example.com" required autocomplete="email"></div>
-      <div><label class="field-label">Password</label><input class="auth-input" id="inPw" type="password" placeholder="Your password" required autocomplete="current-password"></div>
+      <div><label class="field-lbl">Email</label><input class="auth-input" id="inEmail" type="email" placeholder="you@example.com" required autocomplete="email"></div>
+      <div><label class="field-lbl">Password</label><input class="auth-input" id="inPw" type="password" placeholder="Your password" required autocomplete="current-password"></div>
       <div class="auth-msg err" id="inErr"></div>
       <button class="auth-btn" id="inBtn" type="submit">Sign in</button>
     </form>
-
     <form class="auth-form hide" id="fUp" onsubmit="doSignup(event)">
-      <div><label class="field-label">Email</label><input class="auth-input" id="upEmail" type="email" placeholder="you@example.com" required autocomplete="email"></div>
-      <div><label class="field-label">Password</label><input class="auth-input" id="upPw" type="password" placeholder="At least 6 characters" required minlength="6" autocomplete="new-password"></div>
+      <div><label class="field-lbl">Email</label><input class="auth-input" id="upEmail" type="email" placeholder="you@example.com" required autocomplete="email"></div>
+      <div><label class="field-lbl">Password</label><input class="auth-input" id="upPw" type="password" placeholder="At least 6 characters" required minlength="6" autocomplete="new-password"></div>
       <div class="auth-msg" id="upMsg"></div>
       <button class="auth-btn" id="upBtn" type="submit">Create account</button>
     </form>
@@ -396,87 +464,93 @@ body { max-width: 430px; margin: 0 auto; }
 
   <!-- TODAY -->
   <div class="page on" id="page-today">
-    <div class="hero-wrap">
+    <div class="hero">
       <div class="hero-fallback hf-nature" id="hFallback"></div>
       <img class="hero-photo dim" id="hPhoto" alt="">
-      <div class="hero-fade"></div>
-      <div class="hero-bar">
+      <div class="hero-gradient"></div>
+      <div class="hero-topbar">
         <div class="hero-logo">Thrive</div>
         <div class="hero-right">
           <span class="hero-date" id="hDate"></span>
-          <button class="signout-btn" onclick="doSignout()">Sign out</button>
+          <button class="signout" onclick="doSignout()">Sign out</button>
+        </div>
+      </div>
+      <div class="hero-content">
+        <div class="ctag"><div class="ctag-dot"></div><span id="cTag">Daily Challenge</span></div>
+        <div class="ctitle" id="cTitle">Loading…</div>
+        <div class="cdesc" id="cDesc"></div>
+        <div class="cbtns">
+          <button class="btn-did" id="btnDid" onclick="completeChallenge()">I did this ✓</button>
+          <button class="btn-skip2" onclick="skipChallenge()">↻</button>
         </div>
       </div>
     </div>
-    <div class="today-body">
-      <div class="ctag"><div class="ctag-dot" id="cDot"></div><span id="cTag">Daily Challenge</span></div>
-      <div class="ctitle" id="cTitle">Loading…</div>
-      <div class="cdesc" id="cDesc"></div>
-      <div class="cactions">
-        <button class="btn-done" id="btnDone" onclick="completeChallenge()">I did this ✓</button>
-        <button class="btn-skip" onclick="skipChallenge()">↻</button>
-      </div>
-      <hr class="divider">
+    <div class="today-card">
       <div class="sec-label">On your list</div>
-      <div class="list-pills" id="todayPills"></div>
+      <div class="qpills" id="todayPills"></div>
     </div>
   </div>
 
   <!-- MY LIST -->
   <div class="page" id="page-list">
-    <div class="lheader">
-      <div class="lheader-top">
+    <div class="lhead">
+      <div class="lhead-top">
         <h2>My List</h2>
         <div class="lcount" id="lCount">0 to try</div>
       </div>
-      <div class="add-bar">
-        <input class="add-inp" id="addInp" type="text" placeholder="Add something to try…" maxlength="80" onkeydown="if(event.key==='Enter')addItem()">
+      <div class="add-row">
+        <input class="add-inp" id="addInp" type="text" placeholder="What do you want to try?" maxlength="80" onkeydown="if(event.key==='Enter')addItem()">
         <button class="add-go" onclick="addItem()">Add</button>
       </div>
     </div>
-    <div class="cat-bar" id="catBar"></div>
-    <div class="lscroll">
+    <div class="lscroll" id="lScroll">
       <div class="lempty" id="lEmpty"><div class="ei">🗺️</div><p>Your list is empty.<br>Add the first thing you want to try.</p></div>
-      <div id="lItems"></div>
+      <div id="lPending"></div>
+
+      <!-- Journal section -->
+      <div id="journalSection" style="display:none;margin-top:28px">
+        <div class="lsec" style="margin-bottom:14px">✦ Completed</div>
+        <div id="lDone"></div>
+      </div>
     </div>
   </div>
 
 </div>
 
 <!-- NAV -->
-<nav class="bottom-nav">
-  <button class="nav-btn on" id="nav-today" onclick="showPage('today')">
+<nav class="bnav">
+  <button class="nb on" id="nav-today" onclick="showPage('today')">
     <span class="ni">◎</span><span class="nl">Today</span>
   </button>
-  <button class="nav-btn" id="nav-list" onclick="showPage('list')">
+  <button class="nb" id="nav-list" onclick="showPage('list')">
     <span class="ni">≡</span><span class="nl">My List</span>
   </button>
 </nav>
 
 <!-- MODAL -->
 <div class="modal-bg" id="modalBg" onclick="bgClick(event)">
-  <div class="modal-sheet">
+  <div class="modal-sheet" id="modalSheet">
     <div class="mhandle"></div>
     <div class="mpreview">
-      <div class="mimg" id="mImg"><div class="mfe" id="mFe"></div><img id="mPhoto" style="display:none;width:100%;height:100%;object-fit:cover" alt=""></div>
+      <div class="mpreview-img" id="mImg"><div class="mfe" id="mFe"></div><img id="mPhoto" style="display:none" alt=""></div>
       <div>
-        <div class="mtitle" id="mTitle"></div>
-        <div class="mcat"><div class="mcat-dot" id="mDot"></div><span id="mCat"></span></div>
+        <div class="mptitle" id="mTitle"></div>
+        <div class="mpcat" id="mCat"></div>
       </div>
     </div>
-    <div class="mq">How was it?</div>
+    <div class="mq" id="mQ">How was it?</div>
     <div class="msub">Be honest — this is just for you.</div>
-    <div class="stars">
-      <button class="star" onclick="setStar(1)">★</button>
-      <button class="star" onclick="setStar(2)">★</button>
-      <button class="star" onclick="setStar(3)">★</button>
-      <button class="star" onclick="setStar(4)">★</button>
-      <button class="star" onclick="setStar(5)">★</button>
+    <div class="stars-row">
+      <button class="mstar" onclick="setStar(1)">★</button>
+      <button class="mstar" onclick="setStar(2)">★</button>
+      <button class="mstar" onclick="setStar(3)">★</button>
+      <button class="mstar" onclick="setStar(4)">★</button>
+      <button class="mstar" onclick="setStar(5)">★</button>
     </div>
     <textarea class="mnote" id="mNote" placeholder="What did you discover? How did it feel…"></textarea>
     <div class="mactions">
-      <button class="msave" onclick="saveRef()">Save reflection</button>
-      <button class="mskip" onclick="closeModal()">Skip</button>
+      <button class="msave" id="mSave" onclick="saveRef()">Save reflection</button>
+      <button class="mcancel" onclick="closeModal()">Skip</button>
     </div>
   </div>
 </div>
@@ -495,268 +569,387 @@ const sb = createClient(
 const UNSPLASH = '6TS9FphLnaJGEhcHqdDbG7WvQ55RbNKIEunJ8x4-xhQ';
 
 const CATS = [
-  { id:'nature',  label:'Nature',  emoji:'🌿', color:'#7da87d', q:'forest nature morning light path' },
-  { id:'arts',    label:'Arts',    emoji:'🎨', color:'#c97070', q:'pottery clay art studio creative' },
-  { id:'food',    label:'Food',    emoji:'🍜', color:'#d4956a', q:'food market cooking fresh ingredients' },
-  { id:'fitness', label:'Fitness', emoji:'🏃', color:'#7db8a4', q:'rock climbing hiking adventure movement' },
-  { id:'social',  label:'Social',  emoji:'🤝', color:'#9b8fc4', q:'people community gathering cafe friends' },
-  { id:'wellness',label:'Wellness',emoji:'🧘', color:'#e8c87d', q:'calm ocean sunrise wellness meditation' },
+  { id:'nature',  label:'Nature',  emoji:'🌿', q:'forest nature morning light mist' },
+  { id:'arts',    label:'Arts',    emoji:'🎨', q:'pottery clay art studio texture' },
+  { id:'food',    label:'Food',    emoji:'🍜', q:'food market cooking fresh colourful' },
+  { id:'fitness', label:'Fitness', emoji:'🏃', q:'rock climbing hiking mountains movement' },
+  { id:'social',  label:'Social',  emoji:'🤝', q:'people community gathering warm light' },
+  { id:'wellness',label:'Wellness',emoji:'🧘', q:'calm ocean sunrise meditation golden hour' },
 ];
 
 const CHALLENGES = [
-  { title:'Sit in nature for 20 quiet minutes', desc:'No music, no podcast. Just you, your senses, and whatever is living around you. Notice what you hear first.', cat:'nature' },
-  { title:'Cook a cuisine you have never tried before', desc:'Pick a country. Find one traditional recipe. Buy the ingredients today. The process matters more than perfection.', cat:'food' },
-  { title:'Go somewhere completely unfamiliar', desc:'A neighbourhood, a road, a building you always pass but never enter. Let curiosity lead for at least 30 minutes.', cat:'nature' },
-  { title:'Create something with your hands today', desc:'Sketch, sculpt, bake, build — make something physical that did not exist this morning. It does not need to be good.', cat:'arts' },
-  { title:'Have one genuinely deep conversation', desc:'Ask someone what has really been on their mind lately. Then actually listen. No advice needed — just presence.', cat:'social' },
-  { title:'Move your body in a way that feels like play', desc:'Not exercise. Play. Sprint, climb something, dance in your kitchen. Move like you did as a child.', cat:'fitness' },
-  { title:'Spend one hour completely phone-free', desc:'From right now. No checking, no glancing. See what fills the space. Notice what you reach for out of habit.', cat:'wellness' },
-  { title:'Do one thing that scares you a little', desc:'Not dangerous — just outside your comfort zone. The size of the action does not matter. Doing it does.', cat:'wellness' },
+  { title:'Sit in nature for 20 quiet minutes', desc:'No music, no podcast. Just you, your senses, and whatever is alive around you.', cat:'nature' },
+  { title:'Cook a cuisine you have never tried', desc:'Pick a country. Find one traditional recipe. The process matters more than perfection.', cat:'food' },
+  { title:'Go somewhere completely unfamiliar', desc:'A neighbourhood, a building you always pass but never enter. Let curiosity lead.', cat:'nature' },
+  { title:'Create something with your hands today', desc:'Sketch, sculpt, bake, build. Make something physical that did not exist this morning.', cat:'arts' },
+  { title:'Have one genuinely deep conversation', desc:'Ask someone what has really been on their mind. Then actually listen.', cat:'social' },
+  { title:'Move your body in a way that feels like play', desc:'Not exercise — play. Sprint, climb, dance. Move like you did as a child.', cat:'fitness' },
+  { title:'Spend one hour completely phone-free', desc:'From right now. No checking. See what fills the space.', cat:'wellness' },
+  { title:'Do one thing that scares you a little', desc:'Not dangerous — just outside your comfort zone. The size does not matter.', cat:'wellness' },
 ];
 
 // ─── STATE ───────────────────────────────────
 let user = null;
 let items = [];
+let reflections = {};  // keyed by item.id
 let photos = {};
-let selCat = 'nature';
 let cIdx = 0, cDate = '', cDone = false;
-let modalId = null, modalRating = 0;
+let modalId = null, modalRating = 0, modalIsEdit = false;
 
-// ─── LOCAL CACHE (photos + challenge only) ───
+// ─── CACHE ───────────────────────────────────
 function loadCache() {
-  try { const c = JSON.parse(localStorage.getItem('thrive_c')||'{}'); photos=c.photos||{}; cIdx=c.cIdx||0; cDate=c.cDate||''; cDone=c.cDone||false; } catch(e){}
+  try { const c=JSON.parse(localStorage.getItem('tv2')||'{}'); photos=c.photos||{}; cIdx=c.cIdx||0; cDate=c.cDate||''; cDone=c.cDone||false; } catch(e){}
 }
 function saveCache() {
-  try { localStorage.setItem('thrive_c', JSON.stringify({photos,cIdx,cDate,cDone})); } catch(e){}
+  try { localStorage.setItem('tv2',JSON.stringify({photos,cIdx,cDate,cDone})); } catch(e){}
 }
 
-// ─── AUTH HELPERS ────────────────────────────
+// ─── AUTH ────────────────────────────────────
 function switchTab(t) {
   document.querySelectorAll('.auth-tab').forEach((el,i)=>el.classList.toggle('on',(i===0&&t==='in')||(i===1&&t==='up')));
-  document.getElementById('fIn').classList.toggle('hide', t!=='in');
-  document.getElementById('fUp').classList.toggle('hide', t!=='up');
+  document.getElementById('fIn').classList.toggle('hide',t!=='in');
+  document.getElementById('fUp').classList.toggle('hide',t!=='up');
 }
 
 async function doLogin(e) {
   e.preventDefault();
-  const btn=document.getElementById('inBtn'), err=document.getElementById('inErr');
-  btn.disabled=true; btn.textContent='Signing in…'; err.classList.remove('show');
-  const {error} = await sb.auth.signInWithPassword({email:document.getElementById('inEmail').value.trim(), password:document.getElementById('inPw').value});
+  const btn=document.getElementById('inBtn'),err=document.getElementById('inErr');
+  btn.disabled=true;btn.textContent='Signing in…';err.classList.remove('show');
+  const {error}=await sb.auth.signInWithPassword({email:document.getElementById('inEmail').value.trim(),password:document.getElementById('inPw').value});
   if(error){err.textContent=error.message;err.classList.add('show');btn.disabled=false;btn.textContent='Sign in';}
 }
 
 async function doSignup(e) {
   e.preventDefault();
-  const btn=document.getElementById('upBtn'), msg=document.getElementById('upMsg');
-  btn.disabled=true; btn.textContent='Creating account…'; msg.classList.remove('show');
-  const {error} = await sb.auth.signUp({email:document.getElementById('upEmail').value.trim(), password:document.getElementById('upPw').value});
+  const btn=document.getElementById('upBtn'),msg=document.getElementById('upMsg');
+  btn.disabled=true;btn.textContent='Creating…';msg.classList.remove('show');
+  const {error}=await sb.auth.signUp({email:document.getElementById('upEmail').value.trim(),password:document.getElementById('upPw').value});
   msg.classList.add('show');
   if(error){msg.className='auth-msg err show';msg.textContent=error.message;btn.disabled=false;btn.textContent='Create account';}
-  else{msg.className='auth-msg ok show';msg.textContent='Account created! Check your email to confirm, then sign in.';btn.disabled=false;btn.textContent='Create account';}
+  else{msg.className='auth-msg ok show';msg.textContent='Check your email to confirm, then sign in.';btn.disabled=false;btn.textContent='Create account';}
 }
 
-async function doSignout() { await sb.auth.signOut(); }
+async function doSignout(){await sb.auth.signOut();}
 
-// ─── AUTH STATE ──────────────────────────────
 sb.auth.onAuthStateChange(async(_,session)=>{
   if(session?.user){
     user=session.user;
     document.getElementById('auth').classList.add('gone');
-    await loadItems();
+    await loadData();
     initChallenge();
-    renderCatBar();
     hideLoading();
   } else {
-    user=null; items=[];
+    user=null;items=[];reflections={};
     document.getElementById('auth').classList.remove('gone');
     hideLoading();
   }
 });
 
 // ─── DB ──────────────────────────────────────
-async function loadItems() {
-  const {data,error} = await sb.from('items').select('*').eq('user_id',user.id).order('added_at',{ascending:false});
-  if(!error&&data) items=data;
+async function loadData() {
+  const [{data:iData},{data:rData}]=await Promise.all([
+    sb.from('items').select('*').eq('user_id',user.id).order('added_at',{ascending:false}),
+    sb.from('reflections').select('*').eq('user_id',user.id),
+  ]);
+  if(iData) items=iData;
+  if(rData) rData.forEach(r=>reflections[r.item_id]=r);
 }
 
-async function dbInsert(item) {
-  const {data,error} = await sb.from('items').insert({user_id:user.id,...item}).select().single();
+async function dbInsert(row){
+  const {data,error}=await sb.from('items').insert({user_id:user.id,...row}).select().single();
   return error?null:data;
 }
-
-async function dbUpdate(id,patch) {
-  await sb.from('items').update(patch).eq('id',id).eq('user_id',user.id);
-}
-
-async function dbReflection(itemId,rating,note) {
+async function dbUpdate(id,patch){await sb.from('items').update(patch).eq('id',id).eq('user_id',user.id);}
+async function dbSaveRef(itemId,rating,note){
   await sb.from('reflections').delete().eq('item_id',itemId).eq('user_id',user.id);
-  await sb.from('reflections').insert({user_id:user.id,item_id:itemId,rating,note});
+  const {data}=await sb.from('reflections').insert({user_id:user.id,item_id:itemId,rating,note}).select().single();
+  if(data) reflections[itemId]=data;
 }
 
-// ─── UNSPLASH ────────────────────────────────
-async function getPhoto(catId) {
+// ─── PHOTOS ──────────────────────────────────
+async function getPhoto(catId){
   if(photos[catId]) return photos[catId];
-  const cat=CATS.find(c=>c.id===catId); if(!cat) return null;
-  try {
+  const cat=CATS.find(c=>c.id===catId);if(!cat) return null;
+  try{
     const r=await fetch(`https://api.unsplash.com/photos/random?query=${encodeURIComponent(cat.q)}&orientation=landscape&client_id=${UNSPLASH}`);
     if(!r.ok) return null;
     const d=await r.json();
     const url=d?.urls?.regular||d?.urls?.small;
     if(url){photos[catId]=url;saveCache();}
     return url||null;
-  } catch(e){return null;}
+  }catch(e){return null;}
 }
 
 // ─── NAV ─────────────────────────────────────
-function showPage(name) {
+function showPage(n){
   document.querySelectorAll('.page').forEach(p=>p.classList.remove('on'));
-  document.querySelectorAll('.nav-btn').forEach(b=>b.classList.remove('on'));
-  document.getElementById('page-'+name).classList.add('on');
-  document.getElementById('nav-'+name).classList.add('on');
-  if(name==='list') renderList();
-  if(name==='today') renderPills();
+  document.querySelectorAll('.nb').forEach(b=>b.classList.remove('on'));
+  document.getElementById('page-'+n).classList.add('on');
+  document.getElementById('nav-'+n).classList.add('on');
+  if(n==='list'){renderList();}
+  if(n==='today'){renderPills();}
 }
 
 // ─── TODAY ───────────────────────────────────
-function today() { return new Date().toISOString().slice(0,10); }
+function todayStr(){return new Date().toISOString().slice(0,10);}
 
-function initChallenge() {
-  const t=today();
+function initChallenge(){
+  const t=todayStr();
   if(cDate!==t){cDate=t;cIdx=(cIdx+1)%CHALLENGES.length;cDone=false;saveCache();}
   renderChallenge();
 }
 
-function renderChallenge() {
+function renderChallenge(){
   const c=CHALLENGES[cIdx%CHALLENGES.length];
-  const cat=CATS.find(x=>x.id===c.cat);
+  const cat=CATS.find(x=>x.id===c.cat)||CATS[0];
   document.getElementById('cTitle').textContent=c.title;
   document.getElementById('cDesc').textContent=c.desc;
   document.getElementById('cTag').textContent=`Daily Challenge · ${cat.label}`;
-  document.getElementById('cDot').style.background=cat.color;
   document.getElementById('hDate').textContent=new Date().toLocaleDateString('en-GB',{weekday:'short',day:'numeric',month:'short'});
   document.getElementById('hFallback').className=`hero-fallback hf-${c.cat}`;
-  const btn=document.getElementById('btnDone');
-  if(cDone){btn.textContent='✓ Done for today';btn.classList.add('done');btn.disabled=true;btn.style.opacity='.65';}
+  const btn=document.getElementById('btnDid');
+  if(cDone){btn.textContent='✓ Done for today';btn.classList.add('done');btn.disabled=true;btn.style.opacity='.8';}
   else{btn.textContent='I did this ✓';btn.classList.remove('done');btn.disabled=false;btn.style.opacity='';}
   loadHeroPhoto(c.cat);
   renderPills();
 }
 
-async function loadHeroPhoto(catId) {
+async function loadHeroPhoto(catId){
   const img=document.getElementById('hPhoto');
   img.classList.add('dim');
   const url=await getPhoto(catId);
   if(url){img.src=url;img.onload=()=>img.classList.remove('dim');}
 }
 
-function skipChallenge() {
-  if(cDone){toast('Already done today!');return;}
-  cIdx=(cIdx+1)%CHALLENGES.length;saveCache();renderChallenge();toast('New challenge loaded');
+function skipChallenge(){
+  if(cDone){showToast('Already done today!');return;}
+  cIdx=(cIdx+1)%CHALLENGES.length;saveCache();renderChallenge();showToast('New challenge loaded');
 }
 
-async function completeChallenge() {
+async function completeChallenge(){
   if(cDone) return;
   const c=CHALLENGES[cIdx%CHALLENGES.length];
   const exists=items.find(i=>i.is_challenge&&i.challenge_index===cIdx);
-  if(exists){openModal(exists.id);return;}
+  if(exists){openModal(exists.id,false);return;}
   const saved=await dbInsert({title:c.title,cat:c.cat,done:true,is_challenge:true,challenge_index:cIdx});
-  if(saved){items.unshift(saved);cDone=true;saveCache();renderChallenge();openModal(saved.id);}
+  if(saved){items.unshift(saved);cDone=true;saveCache();renderChallenge();openModal(saved.id,false);}
 }
 
-function renderPills() {
+function renderPills(){
   const el=document.getElementById('todayPills');
   const pending=items.filter(i=>!i.done&&!i.is_challenge);
-  if(!pending.length){el.innerHTML='<div class="pills-empty">Nothing on your list yet — add something to try.</div>';return;}
+  if(!pending.length){el.innerHTML='<div class="pills-empty">Nothing on your list yet — add something.</div>';return;}
   el.innerHTML=pending.slice(0,4).map(i=>{
-    const cat=CATS.find(c=>c.id===i.cat);
-    return `<div class="lpill" onclick="showPage('list')"><div class="lpill-dot" style="background:${cat?cat.color:'#aaa'}"></div>${i.title}</div>`;
+    return `<div class="qpill" onclick="showPage('list')"><div class="qp-dot" style="background:var(--accent)"></div>${i.title}</div>`;
   }).join('');
 }
 
 // ─── MY LIST ─────────────────────────────────
-function renderCatBar() {
-  document.getElementById('catBar').innerHTML=CATS.map(c=>
-    `<div class="cchip ${selCat===c.id?'on':''}" onclick="selCatF('${c.id}')">${c.emoji} ${c.label}</div>`
-  ).join('');
-}
-
-function selCatF(id){selCat=id;renderCatBar();}
-
-async function addItem() {
+async function addItem(){
   const inp=document.getElementById('addInp');
   const title=inp.value.trim();
   if(!title||!user){inp.focus();return;}
-  const saved=await dbInsert({title,cat:selCat,done:false,is_challenge:false});
-  if(saved){items.unshift(saved);inp.value='';renderList();renderPills();toast('Added ✦');getPhoto(selCat);}
+
+  // Pick category by simple keyword match (no UI needed)
+  const catId = guessCat(title);
+  const saved=await dbInsert({title,cat:catId,done:false,is_challenge:false});
+  if(saved){items.unshift(saved);inp.value='';renderList();renderPills();showToast('Added ✦');getPhoto(catId);}
 }
 
-function renderList() {
+function guessCat(title){
+  const t=title.toLowerCase();
+  if(/cook|eat|food|recipe|bak|cafe|restaurant|cuisine|meal|chef|taste/.test(t)) return 'food';
+  if(/run|gym|climb|hike|swim|sport|yoga|cycle|walk|exercise|fitness|lift|train/.test(t)) return 'fitness';
+  if(/draw|paint|sketch|sculpt|art|craft|write|music|sing|play|creat|design|photo/.test(t)) return 'arts';
+  if(/meditat|breath|sleep|mindful|rest|relax|spa|wellness|calm|peace/.test(t)) return 'wellness';
+  if(/friend|family|meet|social|party|talk|conversation|community|volunteer|event/.test(t)) return 'social';
+  return 'nature'; // default
+}
+
+function renderList(){
   const pending=items.filter(i=>!i.done);
   const done=items.filter(i=>i.done);
+
   document.getElementById('lCount').textContent=pending.length===1?'1 to try':`${pending.length} to try`;
-  document.getElementById('lEmpty').style.display=(pending.length+done.length===0)?'block':'none';
-  let h='';
-  if(pending.length){h+=`<div class="lsec" style="margin-bottom:9px">To try</div>${pending.map(iHTML).join('')}`;}
-  if(done.length){h+=`<div class="lsec" style="margin-top:18px;margin-bottom:9px">Completed</div>${done.map(iHTML).join('')}`;}
-  document.getElementById('lItems').innerHTML=h;
-  [...pending,...done].forEach(i=>{
-    const cached=photos[i.cat];
-    const el=document.getElementById(`ii-${i.id}`);
+  document.getElementById('lEmpty').style.display=(pending.length===0&&done.length===0)?'block':'none';
+
+  // Pending
+  document.getElementById('lPending').innerHTML=pending.map(pendingHTML).join('');
+
+  // Done / Journal
+  const journalEl=document.getElementById('journalSection');
+  if(done.length>0){
+    journalEl.style.display='block';
+    document.getElementById('lDone').innerHTML=done.map(doneHTML).join('');
+  } else {
+    journalEl.style.display='none';
+  }
+
+  // Load images
+  [...pending,...done].forEach(item=>{
+    const cached=photos[item.cat];
+    const el=document.getElementById(`img-${item.id}`);
     if(!el) return;
     if(cached){el.src=cached;el.onload=()=>el.classList.remove('dim');}
-    else getPhoto(i.cat).then(url=>{if(url&&document.getElementById(`ii-${i.id}`)){const e=document.getElementById(`ii-${i.id}`);e.src=url;e.onload=()=>e.classList.remove('dim');}});
+    else getPhoto(item.cat).then(url=>{
+      if(!url) return;
+      const e=document.getElementById(`img-${item.id}`);
+      if(e){e.src=url;e.onload=()=>e.classList.remove('dim');}
+    });
   });
-  renderCatBar();
 }
 
-function iHTML(item) {
-  const cat=CATS.find(c=>c.id===item.cat);
-  return `<div class="bitem ${item.done?'done':''}" onclick="toggleItem('${item.id}')">
-    <div class="iimg-wrap"><div class="iimg-fallback">${cat?cat.emoji:'✦'}</div><img class="iimg dim" id="ii-${item.id}" alt="${item.title}"></div>
-    <div class="iinfo"><div class="ititle">${item.title}</div><div class="imeta"><div class="icat-dot" style="background:${cat?cat.color:'#aaa'}"></div><span>${cat?cat.label:''}</span></div></div>
-    <div class="icheck">${item.done?'✓':''}</div>
+function pendingHTML(item){
+  const cat=CATS.find(c=>c.id===item.cat)||CATS[0];
+  return `
+  <div class="pitem" onclick="markDone('${item.id}')">
+    <div class="pitem-img-wrap">
+      <div class="pitem-img-fallback">${cat.emoji}</div>
+      <img class="dim" id="img-${item.id}" alt="${item.title}">
+    </div>
+    <div class="pitem-body">
+      <div class="pitem-title">${item.title}</div>
+      <div class="pitem-footer">
+        <div class="pitem-check-btn">
+          <div class="pitem-check-circle"></div>
+          Mark as done
+        </div>
+      </div>
+    </div>
   </div>`;
 }
 
-async function toggleItem(id) {
-  const item=items.find(i=>i.id===id); if(!item) return;
-  if(item.done){item.done=false;await dbUpdate(id,{done:false});renderList();renderPills();toast('Marked as to try again');}
-  else{item.done=true;await dbUpdate(id,{done:true});renderList();renderPills();openModal(id);}
+function doneHTML(item){
+  const cat=CATS.find(c=>c.id===item.cat)||CATS[0];
+  const ref=reflections[item.id];
+  const stars=ref?Array.from({length:5},(_,i)=>`<span class="cstar ${i<ref.rating?'':'empty'}">★</span>`).join(''):'';
+  const note=ref?.note?`<div class="citem-note">${ref.note}</div>`:`<div class="citem-note empty">No note yet — tap to add one.</div>`;
+  const date=ref?new Date(ref.created_at).toLocaleDateString('en-GB',{day:'numeric',month:'short'}):'';
+  return `
+  <div class="citem" onclick="openModal('${item.id}',true)">
+    <div class="citem-img-wrap">
+      <div class="citem-img-fallback">${cat.emoji}</div>
+      <img class="dim" id="img-${item.id}" alt="${item.title}">
+      <div class="citem-img-overlay"></div>
+    </div>
+    <div class="citem-body">
+      <div class="citem-header">
+        <div class="citem-title">${item.title}</div>
+        <div class="trophy">🏆</div>
+      </div>
+      ${stars?`<div class="citem-stars">${stars}</div>`:''}
+      ${note}
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-top:4px">
+        <div class="citem-date">${date}</div>
+        <div class="citem-edit-btn">✏ ${ref?.note?'Edit note':'Add note'}</div>
+      </div>
+    </div>
+  </div>`;
+}
+
+async function markDone(id){
+  const item=items.find(i=>i.id===id);if(!item) return;
+  item.done=true;
+  await dbUpdate(id,{done:true});
+  celebrate(id);
+  renderList();renderPills();
+  setTimeout(()=>openModal(id,false),600);
+}
+
+// ─── CELEBRATION ─────────────────────────────
+function celebrate(itemId){
+  const el=document.getElementById(`img-${itemId}`);
+  const rect=el?el.getBoundingClientRect():{top:window.innerHeight/2,left:window.innerWidth/2};
+  const cx=rect.left+rect.width/2, cy=rect.top+rect.height/2;
+
+  const wrap=document.createElement('div');
+  wrap.className='confetti-wrap';
+  document.body.appendChild(wrap);
+
+  const colors=['#c8952a','#f5d98a','#e8b84b','#fff','#2d6a4f','#7da87d'];
+  for(let i=0;i<28;i++){
+    const p=document.createElement('div');
+    p.className='confetti-piece';
+    const angle=(Math.random()*360);
+    const dist=60+Math.random()*80;
+    const dx=Math.cos(angle*Math.PI/180)*dist;
+    const dy=Math.sin(angle*Math.PI/180)*dist-80;
+    p.style.cssText=`
+      left:${cx}px;top:${cy}px;
+      background:${colors[Math.floor(Math.random()*colors.length)]};
+      width:${6+Math.random()*6}px;height:${6+Math.random()*6}px;
+      border-radius:${Math.random()>0.5?'50%':'2px'};
+      animation-delay:${Math.random()*0.15}s;
+      animation-duration:${0.9+Math.random()*0.5}s;
+      transform-origin:center;
+    `;
+    p.style.animation='none';
+    wrap.appendChild(p);
+    requestAnimationFrame(()=>{
+      requestAnimationFrame(()=>{
+        p.style.transition=`transform ${0.9+Math.random()*0.4}s cubic-bezier(.2,.8,.3,1), opacity 0.3s ${0.6+Math.random()*0.3}s ease`;
+        p.style.transform=`translate(${dx}px,${dy}px) rotate(${Math.random()*720}deg) scale(0.3)`;
+        p.style.opacity='0';
+      });
+    });
+  }
+  setTimeout(()=>wrap.remove(),2000);
 }
 
 // ─── MODAL ───────────────────────────────────
-function openModal(id) {
-  modalId=id; modalRating=0;
-  const item=items.find(i=>i.id===id); if(!item) return;
-  const cat=CATS.find(c=>c.id===item.cat);
+function openModal(id, isEdit){
+  modalId=id;modalRating=0;modalIsEdit=isEdit;
+  const item=items.find(i=>i.id===id);if(!item) return;
+  const cat=CATS.find(c=>c.id===item.cat)||CATS[0];
+  const ref=reflections[id];
+
   document.getElementById('mTitle').textContent=item.title;
-  document.getElementById('mCat').textContent=cat?cat.label:'';
-  document.getElementById('mDot').style.background=cat?cat.color:'#aaa';
-  document.getElementById('mFe').textContent=cat?cat.emoji:'✦';
-  document.getElementById('mNote').value='';
-  document.querySelectorAll('.star').forEach(s=>s.classList.remove('lit'));
-  const mp=document.getElementById('mPhoto'), cached=photos[item.cat];
+  document.getElementById('mCat').textContent=cat.label;
+  document.getElementById('mFe').textContent=cat.emoji;
+  document.getElementById('mQ').textContent=isEdit?'Edit your reflection':'How was it?';
+  document.getElementById('mNote').value=ref?.note||'';
+
+  // Pre-fill stars if editing
+  if(ref&&ref.rating){
+    modalRating=ref.rating;
+    document.querySelectorAll('.mstar').forEach((s,i)=>s.classList.toggle('lit',i<ref.rating));
+  } else {
+    document.querySelectorAll('.mstar').forEach(s=>s.classList.remove('lit'));
+  }
+
+  // Save button style
+  const saveBtn=document.getElementById('mSave');
+  saveBtn.textContent=isEdit?'Update reflection':'Save reflection';
+  saveBtn.classList.toggle('gold',!isEdit);
+
+  // Photo
+  const mp=document.getElementById('mPhoto'),cached=photos[item.cat];
   if(cached){mp.src=cached;mp.style.display='block';} else mp.style.display='none';
+
   document.getElementById('modalBg').classList.add('on');
 }
 
 function closeModal(){document.getElementById('modalBg').classList.remove('on');modalId=null;modalRating=0;}
 function bgClick(e){if(e.target===document.getElementById('modalBg'))closeModal();}
 
-function setStar(v) {
+function setStar(v){
   modalRating=v;
-  document.querySelectorAll('.star').forEach((s,i)=>s.classList.toggle('lit',i<v));
+  document.querySelectorAll('.mstar').forEach((s,i)=>s.classList.toggle('lit',i<v));
 }
 
-async function saveRef() {
+async function saveRef(){
   if(!modalId){closeModal();return;}
-  await dbReflection(modalId,modalRating||3,document.getElementById('mNote').value.trim());
-  closeModal();toast('Reflection saved ✦');
+  const note=document.getElementById('mNote').value.trim();
+  const rating=modalRating||3;
+  await dbSaveRef(modalId,rating,note);
+  closeModal();
+  renderList();
+  showToast(modalIsEdit?'Reflection updated ✦':'Reflection saved ✦');
 }
 
 // ─── TOAST ───────────────────────────────────
 let tt;
-function toast(msg){const el=document.getElementById('toast');el.textContent=msg;el.classList.add('show');clearTimeout(tt);tt=setTimeout(()=>el.classList.remove('show'),2400);}
+function showToast(msg){const el=document.getElementById('toast');el.textContent=msg;el.classList.add('show');clearTimeout(tt);tt=setTimeout(()=>el.classList.remove('show'),2600);}
 
 // ─── LOADING ─────────────────────────────────
 function hideLoading(){setTimeout(()=>document.getElementById('loading').classList.add('gone'),500);}
