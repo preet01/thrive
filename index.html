@@ -883,7 +883,8 @@ async function finishOnboarding() {
   btn.style.pointerEvents = 'none';
 
   const toSave = [...sugSelected].map(i => sugData[i]);
-  console.log("[ONBOARDING] finishOnboarding — saving", toSave.length, "items:", toSave.map(s=>s.title));
+  console.log('[ONBOARDING] finishOnboarding — user:', user?.id, '| saving', toSave.length, 'items:', toSave.map(s=>s.title));
+  if (!user) { console.error('[ONBOARDING] ERROR: no user! Cannot save.'); btn.textContent = 'Start my list →'; btn.classList.add('ready'); btn.style.pointerEvents='all'; return; }
   let savedCount = 0;
 
   for (const s of toSave) {
