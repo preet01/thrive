@@ -796,7 +796,10 @@ Return ONLY a JSON array. No explanation. No markdown. Just the raw array:
 
     console.log("[ONBOARDING] calling Claude proxy…");
     console.log("[ONBOARDING] auth token present: true");
+    const controller = new AbortController();
+    const timeout = setTimeout(() => { controller.abort(); console.error('[ONBOARDING] fetch timed out after 15s'); }, 15000);
     const res = await fetch(PROXY, {
+      signal: controller.signal,
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -809,10 +812,11 @@ Return ONLY a JSON array. No explanation. No markdown. Just the raw array:
       })
     });
 
+    clearTimeout(timeout);
     if (!res.ok) {
       const errText = await res.text();
       console.error('Proxy error:', res.status, errText);
-      throw new Error(`Proxy returned ${res.status}`);
+      throw new Error('Proxy returned ' + res.status + ': ' + errText);
     }
 
     const data = await res.json();
@@ -892,19 +896,21 @@ async function finishOnboarding() {
     }
   }
 
-  console.log(`Saved ${savedCount} of ${toSave.length} items`);
+  console.log('[ONBOARDING] Saved ' + savedCount + ' of ' + toSave.length + ' items');
 
-  // Always proceed even if some saves failed
-  document.getElementById('onboard-picks').classList.remove('on');
+  console.log('[ONBOARDING] transitioning to today screen, savedCount:', savedCount);
 
   if (savedCount > 0) {
     initToday();
+    showPage('today');
     showToast('Your list is ready ✦');
   } else {
     // All saves failed — reload data and try to recover
+    console.error('[ONBOARDING] all saves failed, reloading data...');
     await loadData();
     if (items.length > 0) {
       initToday();
+      showPage('today');
       showToast('Your list is ready ✦');
     } else {
       // Show error and let user retry
