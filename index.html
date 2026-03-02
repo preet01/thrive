@@ -660,14 +660,18 @@ async function loadAuthPhoto() {
 }
 
 sb.auth.onAuthStateChange(async (event, session) => {
+  console.log("[AUTH] event:", event, "user:", session?.user?.email || "none");
   if (session?.user) {
     user = session.user;
     document.getElementById('auth').classList.add('gone');
     await loadData();
     const needsOnboarding = items.filter(i => !i.done).length === 0 && items.length === 0;
+    console.log("[BOOT] needsOnboarding:", needsOnboarding, "| total items:", items.length);
     if (needsOnboarding) {
+      console.log("[BOOT] → starting onboarding");
       startOnboarding();
     } else {
+      console.log("[BOOT] → going to Today screen");
       initToday();
     }
     hideLoading();
@@ -689,13 +693,16 @@ async function loadData() {
   ]);
   if (iData) items = iData;
   if (rData) rData.forEach(r => reflections[r.item_id] = r);
+  console.log("[DATA] loaded items:", items.length, "reflections:", Object.keys(reflections).length);
 }
 
 async function dbInsert(row) {
   const {data,error} = await sb.from('items').insert({user_id:user.id,...row}).select().single();
+  if (error) console.error('dbInsert error:', error.message, error.details, row);
   return error ? null : data;
 }
 async function dbUpdate(id, patch) {
+  console.log("[DB] update item:", id, Object.keys(patch));
   patch.updated_at = new Date().toISOString();
   await sb.from('items').update(patch).eq('id',id).eq('user_id',user.id);
 }
@@ -751,6 +758,7 @@ function backToQuestion() {
 
 async function goToSuggestions() {
   const text = document.getElementById('oqText').value.trim();
+  console.log("[ONBOARDING] goToSuggestions — text length:", text.length, "| text:", text.slice(0,60));
   if (text.length < 15) return;
 
   document.getElementById('onboard-q').classList.remove('on');
@@ -783,6 +791,7 @@ Return ONLY a JSON array. No explanation. No markdown. Just the raw array:
   ...8 items total
 ]`;
 
+    console.log("[ONBOARDING] calling Claude proxy…");
     const res = await fetch(PROXY, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -792,10 +801,29 @@ Return ONLY a JSON array. No explanation. No markdown. Just the raw array:
         messages: [{ role: 'user', content: prompt }]
       })
     });
+
+    if (!res.ok) {
+      const errText = await res.text();
+      console.error('Proxy error:', res.status, errText);
+      throw new Error(`Proxy returned ${res.status}`);
+    }
+
     const data = await res.json();
+    console.log('Claude response:', JSON.stringify(data));
+
+    if (data.error) {
+      console.error('Claude API error:', data.error);
+      throw new Error(data.error.message || 'Claude API error');
+    }
+
     const raw = data?.content?.[0]?.text || '';
+    console.log('Raw text:', raw);
     sugData = JSON.parse(raw.replace(/```json|```/g, '').trim());
+    console.log('Parsed suggestions:', sugData);
   } catch(e) {
+    console.error('Suggestion fetch failed:', e);
+    // Show a visible error message on the picks screen header
+    document.getElementById('opSub').textContent = 'Using default suggestions (AI unavailable)';
     sugData = [
       { title: 'Go somewhere you\'ve never been in your city', why: 'A change of scenery can break the loop you\'re in.', cat: 'nature' },
       { title: 'Cook a meal entirely from scratch', why: 'Making something with your hands reconnects you to the present.', cat: 'food' },
@@ -844,18 +872,47 @@ async function finishOnboarding() {
   btn.style.pointerEvents = 'none';
 
   const toSave = [...sugSelected].map(i => sugData[i]);
+  console.log("[ONBOARDING] finishOnboarding — saving", toSave.length, "items:", toSave.map(s=>s.title));
+  let savedCount = 0;
+
   for (const s of toSave) {
-    const saved = await dbInsert({ title: s.title, cat: s.cat || 'nature', done: false, is_challenge: false });
-    if (saved) items.push(saved);
+    try {
+      const saved = await dbInsert({ title: s.title, cat: s.cat || 'nature', done: false, is_challenge: false });
+      if (saved) { items.push(saved); savedCount++; }
+      else console.error('dbInsert returned null for:', s.title);
+    } catch(e) {
+      console.error('dbInsert failed for:', s.title, e);
+    }
   }
 
+  console.log(`Saved ${savedCount} of ${toSave.length} items`);
+
+  // Always proceed even if some saves failed
   document.getElementById('onboard-picks').classList.remove('on');
-  initToday();
-  showToast('Your list is ready ✦');
+
+  if (savedCount > 0) {
+    initToday();
+    showToast('Your list is ready ✦');
+  } else {
+    // All saves failed — reload data and try to recover
+    await loadData();
+    if (items.length > 0) {
+      initToday();
+      showToast('Your list is ready ✦');
+    } else {
+      // Show error and let user retry
+      btn.textContent = 'Try again →';
+      btn.classList.add('ready');
+      btn.style.pointerEvents = 'all';
+      document.getElementById('onboard-picks').classList.add('on');
+      document.getElementById('opFooterHint').textContent = 'Something went wrong — please try again';
+    }
+  }
 }
 
 // ─── NAV ─────────────────────────────
 function showPage(n) {
+  console.log("[NAV] showPage:", n);
   if (n !== 'detail') prevPage = n;
   document.querySelectorAll('.page').forEach(p => p.classList.remove('on'));
   document.querySelectorAll('.nb').forEach(b => b.classList.remove('on'));
@@ -870,6 +927,7 @@ function showPage(n) {
 function todayStr() { return new Date().toISOString().slice(0,10); }
 
 function initToday() {
+  console.log("[TODAY] initToday — items:", items.length, "pending:", items.filter(i=>!i.done).length);
   const t = todayStr();
   const pending = items.filter(i => !i.done);
   if (pending.length === 0) { renderEmptyToday(); return; }
@@ -888,6 +946,7 @@ function initToday() {
 }
 
 function renderToday() {
+  console.log("[TODAY] renderToday — cItemId:", cItemId, "cDone:", cDone);
   const item = items.find(i => i.id === cItemId);
   if (!item) { initToday(); return; }
   document.getElementById('cTitle').textContent = item.title;
@@ -957,6 +1016,7 @@ function renderPills() {
 
 // ─── ITEM DETAIL ─────────────────────
 function openDetail(id) {
+  console.log("[DETAIL] opening item:", id);
   detailItemId = id;
   detailDirty = false;
   const item = items.find(i => i.id === id); if (!item) return;
