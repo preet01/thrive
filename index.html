@@ -396,7 +396,7 @@ body { max-width: 430px; margin: 0 auto; }
   </div>
   <div class="op-footer" id="opFooter">
     <div class="op-footer-hint" id="opFooterHint">Select at least one to continue</div>
-    <button class="op-go-btn" id="opGoBtn" onclick="finishOnboarding()">Start my list →</button>
+    <button class="op-go-btn" id="opGoBtn" onclick="finishOnboarding(event)">Start my list →</button>
   </div>
 </div>
 
@@ -659,11 +659,14 @@ async function loadAuthPhoto() {
   }
 }
 
+let appBooted = false;
 sb.auth.onAuthStateChange(async (event, session) => {
-  console.log("[AUTH] event:", event, "user:", session?.user?.email || "none");
+  console.log("[AUTH] event:", event, "user:", session?.user?.email || "none", "| appBooted:", appBooted);
   if (session?.user) {
     user = session.user;
     document.getElementById('auth').classList.add('gone');
+    if (appBooted) { console.log("[AUTH] already booted, skipping re-init"); hideLoading(); return; }
+    appBooted = true;
     await loadData();
     const needsOnboarding = items.filter(i => !i.done).length === 0 && items.length === 0;
     console.log("[BOOT] needsOnboarding:", needsOnboarding, "| total items:", items.length);
@@ -875,7 +878,8 @@ function toggleSug(i) {
     : `${count} selected — ready when you are`;
 }
 
-async function finishOnboarding() {
+async function finishOnboarding(e) {
+  if (e) e.preventDefault();
   if (sugSelected.size === 0) return;
   const btn = document.getElementById('opGoBtn');
   btn.textContent = 'Saving your list…';
