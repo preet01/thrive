@@ -396,7 +396,7 @@ body { max-width: 430px; margin: 0 auto; }
   </div>
   <div class="op-footer" id="opFooter">
     <div class="op-footer-hint" id="opFooterHint">Select at least one to continue</div>
-    <button class="op-go-btn" id="opGoBtn" onclick="finishOnboarding(event)">Start my list →</button>
+    <button class="op-go-btn" id="opGoBtn" onclick="console.log('BUTTON CLICKED'); finishOnboarding(event);">Start my list →</button>
   </div>
 </div>
 
@@ -649,7 +649,16 @@ async function doSignup(e) {
   else { msg.className='auth-msg ok show'; msg.textContent='Account created! Signing you in…'; btn.disabled=false; btn.textContent='Create account'; }
 }
 
-async function doSignout() { await sb.auth.signOut(); }
+async function doSignout() {
+  console.log("[AUTH] signing out, resetting appBooted");
+  appBooted = false;
+  // Reset any inline styles set during onboarding
+  const oq = document.getElementById('onboard-q');
+  const op = document.getElementById('onboard-picks');
+  oq.style.opacity = ''; oq.style.pointerEvents = '';
+  op.style.opacity = ''; op.style.pointerEvents = '';
+  await sb.auth.signOut();
+}
 
 async function loadAuthPhoto() {
   const url = await getPhotoForTitle('people hiking outdoors adventure');
@@ -905,24 +914,39 @@ async function finishOnboarding(e) {
 
   console.log('[ONBOARDING] transitioning to today screen, savedCount:', savedCount);
 
+  // Force-hide onboarding overlays immediately (no transition delay)
+  const oq = document.getElementById('onboard-q');
+  const op = document.getElementById('onboard-picks');
+  oq.classList.remove('on');
+  op.classList.remove('on');
+  oq.style.opacity = '0';
+  oq.style.pointerEvents = 'none';
+  op.style.opacity = '0';
+  op.style.pointerEvents = 'none';
+  console.log('[ONBOARDING] overlays force-hidden');
+
   if (savedCount > 0) {
+    console.log('[ONBOARDING] ✓ success — calling initToday + showPage');
     initToday();
     showPage('today');
     showToast('Your list is ready ✦');
+    console.log('[ONBOARDING] ✓ complete — should be on Today screen now');
   } else {
-    // All saves failed — reload data and try to recover
-    console.error('[ONBOARDING] all saves failed, reloading data...');
+    console.error('[ONBOARDING] ✗ all saves failed — reloading from DB');
     await loadData();
     if (items.length > 0) {
+      console.log('[ONBOARDING] recovered', items.length, 'items from DB');
       initToday();
       showPage('today');
       showToast('Your list is ready ✦');
     } else {
-      // Show error and let user retry
+      console.error('[ONBOARDING] ✗ recovery failed — showing retry');
       btn.textContent = 'Try again →';
       btn.classList.add('ready');
       btn.style.pointerEvents = 'all';
-      document.getElementById('onboard-picks').classList.add('on');
+      op.classList.add('on');
+      op.style.opacity = '';
+      op.style.pointerEvents = '';
       document.getElementById('opFooterHint').textContent = 'Something went wrong — please try again';
     }
   }
@@ -945,10 +969,11 @@ function showPage(n) {
 function todayStr() { return new Date().toISOString().slice(0,10); }
 
 function initToday() {
-  console.log("[TODAY] initToday — items:", items.length, "pending:", items.filter(i=>!i.done).length);
+  console.log("[TODAY] initToday — items:", items.length, "| pending:", items.filter(i=>!i.done).length);
+  showPage("today");
   const t = todayStr();
   const pending = items.filter(i => !i.done);
-  if (pending.length === 0) { renderEmptyToday(); return; }
+  if (pending.length === 0) { console.log("[TODAY] no pending → renderEmptyToday"); renderEmptyToday(); return; }
 
   if (cDate !== t || !cItemId || !pending.find(i => i.id === cItemId)) {
     cDate = t;
@@ -971,6 +996,7 @@ function renderToday() {
   document.getElementById('cDesc').textContent = item.notes ? item.notes.slice(0, 80) + (item.notes.length > 80 ? '…' : '') : 'Tap the title for details, or mark it done.';
   document.getElementById('hDate').textContent = new Date().toLocaleDateString('en-GB', {weekday:'short',day:'numeric',month:'short'});
   document.getElementById('hFallback').className = `hero-fallback hf-${item.cat}`;
+  restoreCompleteButton();
   const btn = document.getElementById('btnDid');
   if (cDone) { btn.textContent='✓ Done for today'; btn.classList.add('done'); btn.disabled=true; btn.style.opacity='.8'; }
   else { btn.textContent='I did this ✓'; btn.classList.remove('done'); btn.disabled=false; btn.style.opacity=''; }
@@ -979,10 +1005,18 @@ function renderToday() {
 }
 
 function renderEmptyToday() {
-  document.getElementById('cTitle').textContent = 'Your list is empty.';
-  document.getElementById('cDesc').textContent = 'Add something new to try from My List.';
-  document.getElementById('btnDid').style.display = 'none';
-  document.getElementById('btnSkip').style.display = 'none';
+  console.log("[TODAY] renderEmptyToday — all items done or no items");
+  console.log('[TODAY] renderEmptyToday — showing empty state');
+  document.getElementById('cTitle').textContent = 'All caught up!';
+  document.getElementById('cDesc').textContent = 'Add something new to your list to keep discovering.';
+  const btnDid = document.getElementById('btnDid');
+  const btnSkip = document.getElementById('btnSkip');
+  btnDid.textContent = 'Add to my list →';
+  btnDid.style.display = '';
+  btnDid.style.opacity = '1';
+  btnDid.disabled = false;
+  btnDid.onclick = () => showPage('list');
+  btnSkip.style.display = 'none';
 }
 
 async function loadHeroPhoto(item) {
@@ -993,12 +1027,25 @@ async function loadHeroPhoto(item) {
 }
 
 function openDetailFromToday() {
+  console.log("[TODAY] openDetailFromToday — cItemId:", cItemId);
   if (!cItemId) return;
   prevPage = 'today';
   openDetail(cItemId);
 }
 
+function restoreCompleteButton() {
+  const btn = document.getElementById('btnDid');
+  btn.textContent = 'I did this ✓';
+  btn.onclick = completeChallenge;
+  btn.disabled = false;
+  btn.style.display = '';
+  btn.style.opacity = '';
+  btn.classList.remove('done');
+  document.getElementById('btnSkip').style.display = '';
+}
+
 function skipChallenge() {
+  console.log("[TODAY] skipChallenge — cItemId:", cItemId);
   if (cDone) { showToast('Already done today!'); return; }
   const pending = items.filter(i => !i.done && i.id !== cItemId);
   if (pending.length === 0) { showToast('Nothing else on your list'); return; }
@@ -1013,10 +1060,12 @@ function skipChallenge() {
 }
 
 async function completeChallenge() {
-  if (cDone || !cItemId) return;
+  console.log('[TODAY] completeChallenge — cDone:', cDone, 'cItemId:', cItemId);
+  if (cDone || !cItemId) { console.warn('[TODAY] completeChallenge blocked — already done or no item'); return; }
   const item = items.find(i => i.id === cItemId); if (!item) return;
   item.done = true;
   await dbUpdate(cItemId, {done:true});
+  console.log('[TODAY] item marked done in DB');
   celebrate(cItemId);
   cDone = true; saveCache();
   renderToday(); renderPills();
@@ -1062,6 +1111,7 @@ function openDetail(id) {
 }
 
 function closeDetail() {
+  console.log("[DETAIL] closeDetail — dirty:", detailDirty, "returning to:", prevPage);
   if (detailDirty) saveDetail(true); // auto-save on back
   showPage(prevPage);
 }
@@ -1094,6 +1144,7 @@ function removeDetailLink(i) {
 }
 
 async function saveDetail(silent = false) {
+  console.log("[DETAIL] saveDetail — itemId:", detailItemId, "silent:", silent);
   if (!detailItemId) return;
   const notes = document.getElementById('dNotes').value.trim();
   const location = document.getElementById('dLocation').value.trim();
@@ -1109,10 +1160,12 @@ async function saveDetail(silent = false) {
 
 async function markDoneFromDetail() {
   if (!detailItemId) return;
+  console.log('[DETAIL] markDoneFromDetail — item:', detailItemId);
   await saveDetail(true);
   const item = items.find(i => i.id === detailItemId); if (!item) return;
   item.done = true;
   await dbUpdate(detailItemId, {done:true});
+  console.log('[DETAIL] item marked done in DB, returning to:', prevPage);
   celebrate(detailItemId);
   if (detailItemId === cItemId) { cDone = true; saveCache(); }
   renderList(); renderPills(); renderToday();
@@ -1124,6 +1177,7 @@ async function markDoneFromDetail() {
 async function addItem() {
   const inp = document.getElementById('addInp');
   const title = inp.value.trim();
+  console.log("[LIST] addItem — title:", title, "user:", !!user);
   if (!title || !user) { inp.focus(); return; }
   const catId = guessCat(title);
   const saved = await dbInsert({title, cat:catId, done:false, is_challenge:false});
@@ -1150,6 +1204,7 @@ function guessCat(title) {
 function renderList() {
   const pending = items.filter(i => !i.done);
   const done = items.filter(i => i.done);
+  console.log("[LIST] renderList — pending:", pending.length, "done:", done.length);
   document.getElementById('lCount').textContent = pending.length === 1 ? '1 to try' : `${pending.length} to try`;
   document.getElementById('lEmpty').style.display = (pending.length===0 && done.length===0) ? 'block' : 'none';
   document.getElementById('lPending').innerHTML = pending.map(pendingHTML).join('');
@@ -1245,8 +1300,10 @@ function celebrate(itemId) {
 
 // ─── REFLECTION MODAL ────────────────
 function openModal(id, isEdit) {
+  console.log("[MODAL] openModal — id:", id, "isEdit:", isEdit);
   modalId = id; modalRating = 0; modalIsEdit = isEdit;
-  const item = items.find(i => i.id===id); if (!item) return;
+  const item = items.find(i => i.id===id);
+  if (!item) { console.error("[MODAL] item not found for id:", id); return; }
   document.getElementById('mTitle').textContent = item.title;
   document.getElementById('mCat').textContent = getCatLabel(item.cat);
   document.getElementById('mFe').textContent = getCatEmoji(item.cat);
@@ -1272,7 +1329,8 @@ function bgClick(e) { if (e.target===document.getElementById('modalBg')) closeMo
 function setStar(v) { modalRating=v; document.querySelectorAll('.mstar').forEach((s,i)=>s.classList.toggle('lit',i<v)); }
 
 async function saveRef() {
-  if (!modalId) { closeModal(); return; }
+  console.log("[MODAL] saveRef — modalId:", modalId, "rating:", modalRating);
+  if (!modalId) { console.error("[MODAL] no modalId, closing"); closeModal(); return; }
   const savedId = modalId, wasEdit = modalIsEdit;
   const note = document.getElementById('mNote').value.trim();
   await dbSaveRef(savedId, modalRating || 3, note);
@@ -1284,25 +1342,34 @@ async function saveRef() {
     if (nextPending.length > 0) {
       cItemId = nextPending[0].id; cDone = false; saveCache();
       renderToday();
-      showPage('list');
-      setTimeout(() => {
-        const el = document.getElementById(`pitem-${nextPending[0].id}`);
-        if (el) { el.scrollIntoView({behavior:'smooth',block:'center'}); el.classList.add('highlight'); setTimeout(()=>el.classList.remove('highlight'),2500); }
-      }, 400);
-    } else { renderEmptyToday(); }
+      console.log('[REFLECTION] navigating to', prevPage, 'after reflection save');
+      showPage(prevPage);
+      if (prevPage === 'list') {
+        setTimeout(() => {
+          const el = document.getElementById('pitem-' + nextPending[0].id);
+          if (el) { el.scrollIntoView({behavior:'smooth',block:'center'}); el.classList.add('highlight'); setTimeout(()=>el.classList.remove('highlight'),2500); }
+        }, 400);
+      }
+    } else { renderEmptyToday(); showPage('today'); }
   }
 }
 
 function skipReflection() {
   const wasEdit = modalIsEdit; closeModal();
+  console.log('[REFLECTION] skipped, wasEdit:', wasEdit, 'prevPage:', prevPage);
   if (!wasEdit) {
     const nextPending = items.filter(i => !i.done);
     if (nextPending.length > 0) {
-      showPage('list');
-      setTimeout(() => {
-        const el = document.getElementById(`pitem-${nextPending[0].id}`);
-        if (el) { el.scrollIntoView({behavior:'smooth',block:'center'}); el.classList.add('highlight'); setTimeout(()=>el.classList.remove('highlight'),2500); }
-      }, 400);
+      showPage(prevPage);
+      if (prevPage === 'list') {
+        setTimeout(() => {
+          const el = document.getElementById('pitem-' + nextPending[0].id);
+          if (el) { el.scrollIntoView({behavior:'smooth',block:'center'}); el.classList.add('highlight'); setTimeout(()=>el.classList.remove('highlight'),2500); }
+        }, 400);
+      }
+    } else {
+      renderEmptyToday();
+      showPage('today');
     }
   }
 }
