@@ -116,8 +116,8 @@ body { max-width: 430px; margin: 0 auto; }
 .op-footer { padding:14px 20px max(28px,env(safe-area-inset-bottom)); background:var(--bg); border-top:1px solid var(--ink4); display:none; }
 .op-footer.show { display:block; }
 .op-footer-hint { font-size:11px; color:var(--ink3); text-align:center; margin-bottom:10px; font-style:italic; }
-.op-go-btn { width:100%; background:var(--ink); color:var(--bg); border:none; border-radius:14px; padding:16px; font-family:'DM Sans',sans-serif; font-size:15px; font-weight:500; cursor:pointer; transition:all .2s; opacity:.35; pointer-events:none; }
-.op-go-btn.ready { opacity:1; pointer-events:all; }
+.op-go-btn { width:100%; background:var(--ink); color:var(--bg); border:none; border-radius:14px; padding:16px; font-family:'DM Sans',sans-serif; font-size:15px; font-weight:500; cursor:pointer; transition:all .2s; opacity:.35; pointer-events:all; }
+.op-go-btn.ready { opacity:1; }
 .op-go-btn:active { transform:scale(.97); }
 
 /* ─── APP SHELL ─── */
@@ -889,15 +889,21 @@ function toggleSug(i) {
 
 async function finishOnboarding(e) {
   if (e) e.preventDefault();
-  if (sugSelected.size === 0) return;
+  console.log('[ONBOARDING] finishOnboarding called — selected:', sugSelected.size, 'user:', user?.id);
+  if (sugSelected.size === 0) { console.warn('[ONBOARDING] nothing selected, ignoring'); return; }
+  if (!user) { console.error('[ONBOARDING] ERROR: no user!'); return; }
+
   const btn = document.getElementById('opGoBtn');
-  btn.textContent = 'Saving your list…';
-  btn.classList.remove('ready');
-  btn.style.pointerEvents = 'none';
+  btn.textContent = 'Saving…';
+  btn.disabled = true;
+
+  // Hide overlays IMMEDIATELY before any async work
+  document.getElementById('onboard-q').classList.remove('on');
+  document.getElementById('onboard-picks').classList.remove('on');
+  console.log('[ONBOARDING] overlays hidden');
 
   const toSave = [...sugSelected].map(i => sugData[i]);
-  console.log('[ONBOARDING] finishOnboarding — user:', user?.id, '| saving', toSave.length, 'items:', toSave.map(s=>s.title));
-  if (!user) { console.error('[ONBOARDING] ERROR: no user! Cannot save.'); btn.textContent = 'Start my list →'; btn.classList.add('ready'); btn.style.pointerEvents='all'; return; }
+  console.log('[ONBOARDING] saving', toSave.length, 'items:', toSave.map(s=>s.title));
   let savedCount = 0;
 
   for (const s of toSave) {
