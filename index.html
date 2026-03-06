@@ -120,13 +120,13 @@ body { max-width: 430px; margin: 0 auto; }
 .op-go-btn:active { transform:scale(.97); }
 
 /* ─── APP SHELL ─── */
-.app { display:flex; flex-direction:column; height:100vh; height:100dvh; }
-.pages-wrap { flex:1; position:relative; overflow:hidden; }
+.app { position:relative; height:100vh; height:100dvh; }
+.pages-wrap { position:absolute; inset:0 0 calc(56px + env(safe-area-inset-bottom)) 0; overflow:hidden; }
 .page { position:absolute; inset:0; display:flex; flex-direction:column; opacity:0; pointer-events:none; transform:translateY(10px); transition:opacity .26s ease,transform .26s ease; overflow:hidden; }
 .page.on { opacity:1; pointer-events:all; transform:translateY(0); }
 
 /* ─── NAV ─── */
-.bnav { flex-shrink:0; width:100%; background:rgba(247,245,240,.96); backdrop-filter:blur(18px); border-top:1px solid var(--ink4); display:flex; padding:10px 0 max(16px,env(safe-area-inset-bottom)); touch-action:manipulation; }
+.bnav { position:fixed; bottom:0; left:0; right:0; max-width:430px; margin:0 auto; background:rgba(247,245,240,.96); backdrop-filter:blur(18px); border-top:1px solid var(--ink4); display:flex; padding:10px 0 max(16px,env(safe-area-inset-bottom)); z-index:9999; touch-action:manipulation; }
 .nb { flex:1; display:flex; flex-direction:column; align-items:center; gap:4px; background:none; border:none; cursor:pointer; padding:4px 0; transition:all .2s; touch-action:manipulation; -webkit-tap-highlight-color:transparent; }
 .nb .ni { font-size:20px; line-height:1; transition:transform .2s; }
 .nb .nl { font-size:9px; letter-spacing:1px; text-transform:uppercase; color:var(--ink4); font-weight:500; transition:color .2s; }
@@ -163,7 +163,7 @@ body { max-width: 430px; margin: 0 auto; }
 .btn-did.done { background:rgba(200,149,42,.9); color:#fff; }
 .btn-skip2 { width:52px; background:rgba(255,255,255,.12); border:1px solid rgba(255,255,255,.2); border-radius:14px; font-size:18px; color:rgba(255,255,255,.8); cursor:pointer; display:flex; align-items:center; justify-content:center; flex-shrink:0; transition:all .18s; backdrop-filter:blur(8px); }
 .btn-skip2:active { transform:scale(.95); }
-.today-card { flex:1; background:var(--bg); padding:16px 16px 24px; overflow-y:auto; -webkit-overflow-scrolling:touch; }
+.today-card { flex:1; background:var(--bg); padding:16px 16px max(24px,env(safe-area-inset-bottom)); overflow-y:auto; -webkit-overflow-scrolling:touch; }
 .today-card::-webkit-scrollbar { display:none; }
 .sec-label { font-size:9px; letter-spacing:2px; text-transform:uppercase; color:var(--ink4); margin-bottom:12px; font-weight:500; }
 .qpills { display:flex; flex-direction:column; gap:8px; }
@@ -185,7 +185,7 @@ body { max-width: 430px; margin: 0 auto; }
 .add-inp::placeholder { color:var(--ink4); }
 .add-go { background:var(--ink); color:var(--bg); border:none; border-radius:10px; padding:8px 15px; font-family:'DM Sans',sans-serif; font-size:12px; font-weight:500; cursor:pointer; white-space:nowrap; flex-shrink:0; transition:all .18s; }
 .add-go:active { transform:scale(.96); }
-.lscroll { flex:1; overflow-y:auto; padding:16px 20px 24px; -webkit-overflow-scrolling:touch; }
+.lscroll { flex:1; overflow-y:auto; padding:16px 20px max(24px,env(safe-area-inset-bottom)); -webkit-overflow-scrolling:touch; }
 .lscroll::-webkit-scrollbar { display:none; }
 
 /* ─── PENDING CARD ─── */
@@ -379,7 +379,7 @@ body { max-width: 430px; margin: 0 auto; }
 .dhead-top h2 { font-family:'Lora',serif; font-size:22px; font-style:italic; font-weight:400; }
 .dcount { font-size:12px; color:var(--ink3); background:var(--white); border:1px solid var(--ink4); padding:3px 11px; border-radius:20px; }
 .dhead-sub { font-size:12px; color:var(--ink3); font-weight:300; margin-bottom:0; }
-.dscroll { flex:1; overflow-y:auto; padding:16px 20px 24px; -webkit-overflow-scrolling:touch; }
+.dscroll { flex:1; overflow-y:auto; padding:16px 20px max(24px,env(safe-area-inset-bottom)); -webkit-overflow-scrolling:touch; }
 .dscroll::-webkit-scrollbar { display:none; }
 
 
@@ -666,6 +666,7 @@ body { max-width: 430px; margin: 0 auto; }
   </div>
 
 </div><!-- /pages-wrap -->
+</div><!-- /app -->
 
 <!-- NAV -->
 <nav class="bnav">
@@ -679,7 +680,6 @@ body { max-width: 430px; margin: 0 auto; }
     <span class="ni">✓</span><span class="nl">Done</span>
   </button>
 </nav>
-</div><!-- /app -->
 
 <!-- REFLECTION MODAL -->
 <div class="modal-bg" id="modalBg" onclick="bgClick(event)">
