@@ -120,7 +120,7 @@ body { max-width: 430px; margin: 0 auto; }
 .op-go-btn:active { transform:scale(.97); }
 
 /* ─── APP SHELL ─── */
-.app { display:flex; flex-direction:column; height:100vh; height:100dvh; overflow:hidden; }
+.app { display:flex; flex-direction:column; height:100vh; height:100dvh; }
 .pages-wrap { flex:1; position:relative; overflow:hidden; }
 .page { position:absolute; inset:0; display:flex; flex-direction:column; opacity:0; pointer-events:none; transform:translateY(10px); transition:opacity .26s ease,transform .26s ease; overflow:hidden; }
 .page.on { opacity:1; pointer-events:all; transform:translateY(0); }
@@ -501,7 +501,7 @@ body { max-width: 430px; margin: 0 auto; }
 <div class="pages-wrap">
 
   <!-- TODAY -->
-  <div class="page on" id="page-today">
+  <div class="page" id="page-today">
     <div class="hero">
       <div class="hero-fallback hf-nature" id="hFallback"></div>
       <img class="hero-photo dim" id="hPhoto" alt="">
@@ -774,6 +774,11 @@ setTimeout(() => {
   if (!authResolved) {
     authResolved = true;
     document.getElementById('loading').classList.add('gone');
+    // If auth never resolved, show sign-in screen as fallback
+    if (!user) {
+      document.getElementById('auth').classList.remove('gone');
+      loadAuthPhoto();
+    }
   }
 }, 3000);
 
@@ -845,11 +850,16 @@ sb.auth.onAuthStateChange(async (event, session) => {
       startOnboarding();
     } else {
       console.log("[BOOT] → going to Today screen");
+      // Warm photo cache for existing items (non-blocking)
+      items.forEach(item => getPhotoForTitle(item.title));
       initToday();
     }
     hideLoading();
   } else {
-    user = null; items = []; reflections = {};
+    user = null; items = []; reflections = {}; appBooted = false;
+    // Hide all pages and reset nav
+    document.querySelectorAll('.page').forEach(p => { p.classList.remove('on'); p.style.opacity=''; p.style.pointerEvents=''; });
+    document.querySelectorAll('.nb').forEach(b => b.classList.remove('on'));
     document.getElementById('auth').classList.remove('gone');
     document.getElementById('onboard-q').classList.remove('on');
     document.getElementById('onboard-picks').classList.remove('on');
@@ -1114,6 +1124,8 @@ async function finishOnboarding(e) {
   console.log('[ONBOARDING] Saved ' + savedCount + ' of ' + toSave.length + ' items');
 
   console.log('[ONBOARDING] transitioning to today screen, savedCount:', savedCount);
+  // Pre-fetch photos for all saved items so hero is ready when Today renders
+  items.forEach(item => getPhotoForTitle(item.title));
 
   // Force-hide onboarding overlays immediately (no transition delay)
   const oq = document.getElementById('onboard-q');
@@ -1234,6 +1246,9 @@ function todayStr() { return new Date().toISOString().slice(0,10); }
 
 function initToday() {
   console.log("[TODAY] initToday — items:", items.length, "| pending:", items.filter(i=>!i.done).length);
+  // Pre-render list and done tabs so zero states are ready immediately
+  renderList();
+  renderDone();
   showPage("today");
   const t = todayStr();
   const pending = items.filter(i => !i.done);
@@ -1346,7 +1361,7 @@ async function completeChallenge() {
 function renderPills() {
   const el = document.getElementById('todayPills');
   const pending = items.filter(i => !i.done && i.id !== cItemId);
-  if (!pending.length) { el.innerHTML='<div class="pills-empty">Nothing else on your list right now.</div>'; return; }
+  if (!pending.length) { el.innerHTML='<div class="pills-empty">Everything else is done — <span style="color:var(--accent);cursor:pointer" onclick="showPage(\'list\'))">add more to your list</span></div>'; return; }
   el.innerHTML = pending.slice(0, 5).map(i => {
     const emoji = getCatEmoji(i.cat);
     return `<div class="qpill" onclick="openDetail('${i.id}')">
@@ -1844,6 +1859,13 @@ function showToast(msg) {
   clearTimeout(tt); tt = setTimeout(() => el.classList.remove('show'), 2600);
 }
 
+
+// ─── NAV LISTENERS (belt-and-suspenders, bypasses any event capture) ──
+document.addEventListener('DOMContentLoaded', () => {
+  document.getElementById('nav-today').addEventListener('click', () => showPage('today'));
+  document.getElementById('nav-list').addEventListener('click',  () => showPage('list'));
+  document.getElementById('nav-done').addEventListener('click',  () => showPage('done'));
+});
 // ─── BOOT ────────────────────────────
 loadCache();
 </script>
