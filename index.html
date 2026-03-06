@@ -121,8 +121,8 @@ body { max-width: 430px; margin: 0 auto; }
 .op-go-btn:active { transform:scale(.97); }
 
 /* ─── APP SHELL ─── */
-.app { display:flex; flex-direction:column; height:100vh; height:100dvh; overflow:hidden; position:relative; padding-bottom: calc(60px + env(safe-area-inset-bottom)); }
-.page { position:absolute; inset:0; display:flex; flex-direction:column; opacity:0; pointer-events:none; transform:translateY(10px); transition:opacity .26s ease,transform .26s ease; overflow:hidden; }
+.app { display:flex; flex-direction:column; height:100vh; height:100dvh; overflow:hidden; position:relative; }
+.page { position:absolute; inset:0 0 calc(56px + env(safe-area-inset-bottom)) 0; display:flex; flex-direction:column; opacity:0; pointer-events:none; transform:translateY(10px); transition:opacity .26s ease,transform .26s ease; overflow:hidden; }
 .page.on { opacity:1; pointer-events:all; transform:translateY(0); }
 
 /* ─── NAV ─── */
@@ -163,7 +163,7 @@ body { max-width: 430px; margin: 0 auto; }
 .btn-did.done { background:rgba(200,149,42,.9); color:#fff; }
 .btn-skip2 { width:52px; background:rgba(255,255,255,.12); border:1px solid rgba(255,255,255,.2); border-radius:14px; font-size:18px; color:rgba(255,255,255,.8); cursor:pointer; display:flex; align-items:center; justify-content:center; flex-shrink:0; transition:all .18s; backdrop-filter:blur(8px); }
 .btn-skip2:active { transform:scale(.95); }
-.today-card { flex:1; background:var(--bg); padding:20px 20px 100px; overflow-y:auto; -webkit-overflow-scrolling:touch; }
+.today-card { flex:1; background:var(--bg); padding:20px 20px 24px; overflow-y:auto; -webkit-overflow-scrolling:touch; }
 .today-card::-webkit-scrollbar { display:none; }
 .sec-label { font-size:9px; letter-spacing:2px; text-transform:uppercase; color:var(--ink4); margin-bottom:12px; font-weight:500; }
 .qpills { display:flex; gap:8px; flex-wrap:wrap; }
@@ -183,7 +183,7 @@ body { max-width: 430px; margin: 0 auto; }
 .add-inp::placeholder { color:var(--ink4); }
 .add-go { background:var(--ink); color:var(--bg); border:none; border-radius:10px; padding:8px 15px; font-family:'DM Sans',sans-serif; font-size:12px; font-weight:500; cursor:pointer; white-space:nowrap; flex-shrink:0; transition:all .18s; }
 .add-go:active { transform:scale(.96); }
-.lscroll { flex:1; overflow-y:auto; padding:16px 20px 100px; -webkit-overflow-scrolling:touch; }
+.lscroll { flex:1; overflow-y:auto; padding:16px 20px 24px; -webkit-overflow-scrolling:touch; }
 .lscroll::-webkit-scrollbar { display:none; }
 
 /* ─── PENDING CARD ─── */
@@ -230,7 +230,7 @@ body { max-width: 430px; margin: 0 auto; }
 .citem-edit-btn { display:inline-flex; align-items:center; gap:5px; font-size:11px; color:var(--gold); font-weight:500; background:var(--gold-l); border:1px solid rgba(200,149,42,.2); border-radius:20px; padding:5px 12px; cursor:pointer; font-family:'DM Sans',sans-serif; transition:all .18s; margin-top:6px; }
 
 /* ─── ITEM DETAIL SCREEN ─── */
-#page-detail { background:var(--bg); z-index:150; }
+#page-detail { background:var(--bg); z-index:150; bottom:0 !important; }
 .detail-hero { position:relative; height:46vh; flex-shrink:0; overflow:hidden; }
 .detail-hero-photo { position:absolute; inset:0; width:100%; height:100%; object-fit:cover; transition:opacity .8s ease; }
 .detail-hero-photo.dim { opacity:0; }
@@ -243,7 +243,7 @@ body { max-width: 430px; margin: 0 auto; }
 .detail-hero-title { position:absolute; bottom:0; left:0; right:0; padding:20px 22px 22px; z-index:5; }
 .detail-title-text { font-family:'Lora',serif; font-style:italic; font-size:26px; color:#fff; line-height:1.25; text-shadow:0 1px 16px rgba(0,0,0,.4); }
 
-.detail-body { flex:1; overflow-y:auto; padding:0 20px 100px; -webkit-overflow-scrolling:touch; }
+.detail-body { flex:1; overflow-y:auto; padding:0 20px 90px; -webkit-overflow-scrolling:touch; }
 .detail-body::-webkit-scrollbar { display:none; }
 
 .detail-section { padding:18px 0; border-bottom:1px solid var(--ink4); }
@@ -323,6 +323,55 @@ body { max-width: 430px; margin: 0 auto; }
   100% { box-shadow: var(--shadow), 0 0 0 0 rgba(45,106,79,0); }
 }
 .pitem.highlight { animation: pulseHighlight 1s ease 0.2s 2; }
+
+/* ─── STREAK BAR ─── */
+.streak-bar { display:flex; align-items:center; gap:8px; padding:10px 20px; background:var(--bg); flex-shrink:0; }
+.streak-pill { display:flex; align-items:center; gap:6px; background:linear-gradient(135deg,#c8952a,#e8b84b); color:#fff; border-radius:20px; padding:5px 12px; font-size:12px; font-weight:500; }
+.streak-fire { font-size:14px; }
+.streak-zero { font-size:12px; color:var(--ink3); font-weight:300; font-style:italic; }
+.streak-total { font-size:11px; color:var(--ink3); margin-left:auto; }
+
+/* ─── CATEGORY FILTER ─── */
+.filter-row { display:flex; gap:7px; padding:10px 20px 0; overflow-x:auto; flex-shrink:0; -webkit-overflow-scrolling:touch; }
+.filter-row::-webkit-scrollbar { display:none; }
+.fchip { flex-shrink:0; display:flex; align-items:center; gap:5px; background:var(--white); border:1.5px solid var(--ink4); border-radius:20px; padding:5px 12px; font-size:12px; color:var(--ink2); cursor:pointer; transition:all .18s; white-space:nowrap; touch-action:manipulation; }
+.fchip.on { background:var(--ink); border-color:var(--ink); color:#fff; }
+.fchip:active { transform:scale(.95); }
+.fchip-emoji { font-size:13px; }
+.filter-empty { text-align:center; padding:40px 20px; color:var(--ink3); font-size:13px; font-style:italic; font-weight:300; display:none; }
+.filter-empty.show { display:block; }
+
+/* ─── AI SUGGEST PANEL (list screen) ─── */
+#aiPanel { position:fixed; inset:0; max-width:430px; margin:0 auto; background:var(--bg); z-index:1700; display:flex; flex-direction:column; opacity:0; pointer-events:none; transition:opacity 0.3s ease; }
+#aiPanel.on { opacity:1; pointer-events:all; }
+.aip-head { padding:max(52px,env(safe-area-inset-top) + 16px) 22px 14px; border-bottom:1px solid var(--ink4); flex-shrink:0; background:var(--bg); }
+.aip-back { font-size:11px; color:var(--ink3); cursor:pointer; margin-bottom:12px; display:inline-flex; align-items:center; gap:5px; touch-action:manipulation; }
+.aip-title { font-family:'Lora',serif; font-style:italic; font-size:20px; color:var(--ink); margin-bottom:6px; }
+.aip-textarea { width:100%; background:var(--white); border:1.5px solid var(--ink4); border-radius:14px; padding:13px 14px; font-family:'DM Sans',sans-serif; font-size:14px; color:var(--ink); font-weight:300; line-height:1.6; resize:none; height:90px; outline:none; transition:border-color .2s; }
+.aip-textarea:focus { border-color:var(--ink3); }
+.aip-textarea::placeholder { color:var(--ink4); font-style:italic; }
+.aip-btns { display:flex; gap:8px; margin-top:10px; }
+.aip-btn-ai { flex:1; background:var(--ink); color:var(--bg); border:none; border-radius:12px; padding:12px; font-family:'DM Sans',sans-serif; font-size:13px; font-weight:500; cursor:pointer; transition:all .18s; touch-action:manipulation; }
+.aip-btn-ai:disabled { opacity:.45; pointer-events:none; }
+.aip-btn-manual { background:var(--bg); color:var(--ink2); border:1.5px solid var(--ink4); border-radius:12px; padding:12px 16px; font-family:'DM Sans',sans-serif; font-size:13px; cursor:pointer; transition:all .18s; touch-action:manipulation; }
+.aip-loading { flex:1; display:none; flex-direction:column; align-items:center; justify-content:center; gap:14px; }
+.aip-loading.show { display:flex; }
+.aip-loading-dots { display:flex; gap:8px; }
+.aip-results { flex:1; overflow-y:auto; padding:14px 20px 24px; display:none; -webkit-overflow-scrolling:touch; }
+.aip-results.show { display:block; }
+.aip-results::-webkit-scrollbar { display:none; }
+.aip-results-hint { font-size:11px; color:var(--ink3); text-align:center; margin-bottom:12px; font-style:italic; }
+.aip-footer { padding:12px 20px max(24px,env(safe-area-inset-bottom)); border-top:1px solid var(--ink4); flex-shrink:0; display:none; background:var(--bg); }
+.aip-footer.show { display:block; }
+.aip-footer-hint { font-size:11px; color:var(--ink3); text-align:center; margin-bottom:8px; font-style:italic; }
+.aip-add-btn { width:100%; background:var(--ink); color:var(--bg); border:none; border-radius:14px; padding:15px; font-family:'DM Sans',sans-serif; font-size:14px; font-weight:500; cursor:pointer; transition:all .2s; opacity:.35; touch-action:manipulation; }
+.aip-add-btn.ready { opacity:1; }
+.aip-add-btn:active { transform:scale(.97); }
+
+/* ─── AI SUGGEST BUTTON on list header ─── */
+.ai-suggest-btn { display:flex; align-items:center; gap:6px; background:var(--ink); color:var(--bg); border:none; border-radius:12px; padding:8px 14px; font-family:'DM Sans',sans-serif; font-size:12px; font-weight:500; cursor:pointer; transition:all .18s; white-space:nowrap; flex-shrink:0; touch-action:manipulation; }
+.ai-suggest-btn:active { transform:scale(.96); }
+.ai-sparkle { font-size:13px; }
 </style>
 </head>
 <body>
@@ -426,6 +475,7 @@ body { max-width: 430px; margin: 0 auto; }
         </div>
       </div>
     </div>
+    <div class="streak-bar" id="streakBar"></div>
     <div class="today-card">
       <div class="sec-label">Also on your list</div>
       <div class="qpills" id="todayPills"></div>
@@ -440,11 +490,14 @@ body { max-width: 430px; margin: 0 auto; }
         <div class="lcount" id="lCount">0 to try</div>
       </div>
       <div class="add-row">
-        <input class="add-inp" id="addInp" type="text" placeholder="What do you want to try?" maxlength="80" onkeydown="if(event.key==='Enter')addItem()">
+        <input class="add-inp" id="addInp" type="text" placeholder="Add your own…" maxlength="80" onkeydown="if(event.key==='Enter')addItem()">
         <button class="add-go" onclick="addItem()">Add</button>
+        <button class="ai-suggest-btn" onclick="openAiPanel()"><span class="ai-sparkle">✦</span> Find ideas</button>
       </div>
     </div>
+    <div class="filter-row" id="filterRow"></div>
     <div class="lscroll" id="lScroll">
+      <div class="filter-empty" id="filterEmpty">No items in this category.</div>
       <div class="lempty" id="lEmpty"><div class="ei">🗺️</div><p>Your list is empty.<br>Add the first thing you want to try.</p></div>
       <div id="lPending"></div>
       <div id="journalSection" style="display:none">
@@ -511,6 +564,32 @@ body { max-width: 430px; margin: 0 auto; }
     </div>
   </div>
 
+</div>
+
+
+<!-- AI SUGGEST PANEL -->
+<div id="aiPanel">
+  <div class="aip-head">
+    <div class="aip-back" onclick="closeAiPanel()">← Back to list</div>
+    <div class="aip-title">Find ideas with AI</div>
+    <textarea class="aip-textarea" id="aipText" placeholder="Tell me what you're into, what you're feeling, or what kind of thing you want to try…" oninput="aipCheck()"></textarea>
+    <div class="aip-btns">
+      <button class="aip-btn-ai" id="aipBtn" onclick="runAiSuggest()" disabled>✦ Generate ideas</button>
+      <button class="aip-btn-manual" onclick="closeAiPanel()">Just add manually</button>
+    </div>
+  </div>
+  <div class="aip-loading" id="aipLoading">
+    <div class="aip-loading-dots"><div class="op-dot"></div><div class="op-dot"></div><div class="op-dot"></div></div>
+    <div class="op-loading-text">Finding ideas for you…</div>
+  </div>
+  <div class="aip-results" id="aipResults">
+    <div class="aip-results-hint">Tap everything you want to add</div>
+    <div id="aipCards"></div>
+  </div>
+  <div class="aip-footer" id="aipFooter">
+    <div class="aip-footer-hint" id="aipFooterHint">Select at least one</div>
+    <button class="aip-add-btn" id="aipAddBtn" onclick="addAiSelected()">Add to my list</button>
+  </div>
 </div>
 
 <!-- NAV -->
@@ -586,6 +665,9 @@ let detailItemId = null;
 let detailDirty = false;
 let detailLinks = [];
 let prevPage = 'today';
+let activeFilter = 'all';       // category filter on list screen
+let aiPanelSelected = new Set(); // separate from onboarding sugSelected
+let aiPanelData = [];            // separate from onboarding sugData
 
 // ─── CACHE ───────────────────────────
 function loadCache() {
@@ -750,6 +832,57 @@ function getCatLabel(catId) {
   return CATS.find(c => c.id === catId)?.label || 'Nature';
 }
 
+
+// ─── SHARED AI SUGGESTION FETCHER ────────────────────────────
+async function fetchClaudeSuggestions(text) {
+  const prompt = `A user is using "Thrive" — a personal life discovery app. They wrote this about themselves or what they want:
+
+"${text}"
+
+Based on exactly what they wrote, suggest 8 specific, personal activities they could try. These should feel chosen specifically for this person — not generic wellness tips.
+
+Each activity should be:
+- Concrete and doable (not vague)
+- Matched to the emotional context they described
+- Varied across life areas (social, physical, creative, reflective, adventurous)
+- Something a real person would actually want to do
+
+Return ONLY a JSON array. No explanation. No markdown. Just the raw array:
+[
+  {"title": "activity title", "why": "one sentence why this fits them", "cat": "one of: nature|arts|food|fitness|social|wellness"},
+  ...8 items total
+]`;
+
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), 20000);
+  const res = await fetch(PROXY, {
+    signal: controller.signal,
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBlcWdvdWRwd3dtYW5iY2pkZ3N3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzIyNTAzNTksImV4cCI6MjA4NzgyNjM1OX0.BRswh8-WzrJ_7FRG3Q-V2qPHjcQkJG6EWnWLoMRlSIc'
+    },
+    body: JSON.stringify({ model: 'claude-sonnet-4-20250514', max_tokens: 1000, messages: [{ role: 'user', content: prompt }] })
+  });
+  clearTimeout(timeout);
+  if (!res.ok) throw new Error('Proxy ' + res.status);
+  const data = await res.json();
+  if (data.error) throw new Error(data.error.message || 'Claude API error');
+  const raw = data?.content?.[0]?.text || '';
+  return JSON.parse(raw.replace(/```json|```/g, '').trim());
+}
+
+const DEFAULT_SUGGESTIONS = [
+  { title: "Go somewhere you've never been in your city", why: "A change of scenery can break the loop you're in.", cat: 'nature' },
+  { title: 'Cook a meal entirely from scratch', why: 'Making something with your hands reconnects you to the present.', cat: 'food' },
+  { title: 'Write three pages of anything, unfiltered', why: 'Getting thoughts out of your head makes room for something new.', cat: 'arts' },
+  { title: 'Have a genuinely honest conversation with someone', why: 'Real connection often starts with saying something true.', cat: 'social' },
+  { title: 'Spend a morning completely phone-free', why: "You might be surprised what fills the space.", cat: 'wellness' },
+  { title: "Try one physical thing you've been avoiding", why: 'The body often knows things the mind talks you out of.', cat: 'fitness' },
+  { title: "Visit a place that always caught your eye but you never entered", why: 'Curiosity deferred is energy wasted.', cat: 'nature' },
+  { title: 'Make something — anything — with your hands today', why: 'Creation is the antidote to feeling passive.', cat: 'arts' },
+];
+
 // ─── ONBOARDING ──────────────────────
 function startOnboarding() {
   getPhotoForTitle('nature landscape adventure morning').then(url => {
@@ -788,75 +921,13 @@ async function goToSuggestions() {
   document.getElementById('opSub').textContent = 'One moment.';
 
   try {
-    const prompt = `A user signed up for "Thrive" — a personal life discovery app. They wrote this about themselves:
-
-"${text}"
-
-Based on exactly what they wrote, suggest 8 specific, personal activities they could try. These should feel like they were chosen specifically for this person — not generic wellness tips.
-
-Each activity should be:
-- Concrete and doable (not vague like "explore your creativity")
-- Matched to the emotional context they described
-- Varied across different life areas (social, physical, creative, reflective, adventurous)
-- Something a real person would actually want to do
-
-Return ONLY a JSON array. No explanation. No markdown. Just the raw array:
-[
-  {"title": "activity title", "why": "one sentence: why this fits them specifically", "cat": "one of: nature|arts|food|fitness|social|wellness"},
-  ...8 items total
-]`;
-
     console.log("[ONBOARDING] calling Claude proxy…");
-    console.log("[ONBOARDING] auth token present: true");
-    const controller = new AbortController();
-    const timeout = setTimeout(() => { controller.abort(); console.error('[ONBOARDING] fetch timed out after 15s'); }, 15000);
-    const res = await fetch(PROXY, {
-      signal: controller.signal,
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBlcWdvdWRwd3dtYW5iY2pkZ3N3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzIyNTAzNTksImV4cCI6MjA4NzgyNjM1OX0.BRswh8-WzrJ_7FRG3Q-V2qPHjcQkJG6EWnWLoMRlSIc'
-      },
-      body: JSON.stringify({
-        model: 'claude-sonnet-4-20250514',
-        max_tokens: 1000,
-        messages: [{ role: 'user', content: prompt }]
-      })
-    });
-
-    clearTimeout(timeout);
-    if (!res.ok) {
-      const errText = await res.text();
-      console.error('Proxy error:', res.status, errText);
-      throw new Error('Proxy returned ' + res.status + ': ' + errText);
-    }
-
-    const data = await res.json();
-    console.log('Claude response:', JSON.stringify(data));
-
-    if (data.error) {
-      console.error('Claude API error:', data.error);
-      throw new Error(data.error.message || 'Claude API error');
-    }
-
-    const raw = data?.content?.[0]?.text || '';
-    console.log('Raw text:', raw);
-    sugData = JSON.parse(raw.replace(/```json|```/g, '').trim());
+    sugData = await fetchClaudeSuggestions(text);
     console.log('Parsed suggestions:', sugData);
   } catch(e) {
     console.error('Suggestion fetch failed:', e);
-    // Show a visible error message on the picks screen header
     document.getElementById('opSub').textContent = 'Using default suggestions (AI unavailable)';
-    sugData = [
-      { title: 'Go somewhere you\'ve never been in your city', why: 'A change of scenery can break the loop you\'re in.', cat: 'nature' },
-      { title: 'Cook a meal entirely from scratch', why: 'Making something with your hands reconnects you to the present.', cat: 'food' },
-      { title: 'Write three pages of anything, unfiltered', why: 'Getting thoughts out of your head makes room for something new.', cat: 'arts' },
-      { title: 'Have a genuinely honest conversation with someone', why: 'Real connection often starts with saying something true.', cat: 'social' },
-      { title: 'Spend a morning completely phone-free', why: 'You might be surprised what fills the space.', cat: 'wellness' },
-      { title: 'Try one physical thing you\'ve been avoiding', why: 'The body often knows things the mind talks you out of.', cat: 'fitness' },
-      { title: 'Visit a place that always caught your eye but you never entered', why: 'Curiosity deferred is energy wasted.', cat: 'nature' },
-      { title: 'Make something — anything — with your hands today', why: 'Creation is the antidote to feeling passive.', cat: 'arts' },
-    ];
+    sugData = DEFAULT_SUGGESTIONS;
   }
 
   document.getElementById('opLoading').style.display = 'none';
@@ -958,6 +1029,68 @@ async function finishOnboarding(e) {
   }
 }
 
+
+// ─── STREAK ──────────────────────────
+function computeStreak() {
+  // Build a set of dates on which user completed something
+  const doneDates = new Set();
+  Object.values(reflections).forEach(r => {
+    if (r?.created_at) doneDates.add(r.created_at.slice(0,10));
+  });
+  // Also count if cDone is true today (completed but reflection skipped)
+  items.filter(i => i.done && i.updated_at).forEach(i => {
+    doneDates.add(i.updated_at.slice(0,10));
+  });
+
+  let streak = 0;
+  const today = new Date();
+  // Walk backwards from yesterday (today counts if cDone)
+  // Start check: if today has activity, count it; then keep going back
+  const todayStr2 = today.toISOString().slice(0,10);
+  let cursor = new Date(today);
+  // Allow today in streak if something was done today
+  if (doneDates.has(todayStr2) || cDone) {
+    streak = 1;
+    cursor.setDate(cursor.getDate() - 1);
+    while (true) {
+      const d = cursor.toISOString().slice(0,10);
+      if (!doneDates.has(d)) break;
+      streak++;
+      cursor.setDate(cursor.getDate() - 1);
+    }
+  } else {
+    // Check if yesterday had activity (streak still alive, just not extended)
+    cursor.setDate(cursor.getDate() - 1);
+    const yesterdayStr = cursor.toISOString().slice(0,10);
+    if (doneDates.has(yesterdayStr)) {
+      streak = 1;
+      cursor.setDate(cursor.getDate() - 1);
+      while (true) {
+        const d = cursor.toISOString().slice(0,10);
+        if (!doneDates.has(d)) break;
+        streak++;
+        cursor.setDate(cursor.getDate() - 1);
+      }
+    }
+  }
+  return { streak, total: items.filter(i => i.done).length };
+}
+
+function renderStreak() {
+  const bar = document.getElementById('streakBar');
+  if (!bar) return;
+  const { streak, total } = computeStreak();
+  if (streak === 0) {
+    bar.innerHTML = `
+      <span class="streak-zero">Start your streak — complete something today</span>
+      <span class="streak-total">${total} completed</span>`;
+  } else {
+    bar.innerHTML = `
+      <div class="streak-pill"><span class="streak-fire">🔥</span>${streak} day streak</div>
+      <span class="streak-total">${total} completed</span>`;
+  }
+}
+
 // ─── NAV ─────────────────────────────
 function showPage(n) {
   console.log("[NAV] showPage:", n);
@@ -967,7 +1100,7 @@ function showPage(n) {
   document.getElementById('page-'+n).classList.add('on');
   const navEl = document.getElementById('nav-'+n);
   if (navEl) navEl.classList.add('on');
-  if (n === 'list') { renderList(); document.getElementById('nav-list').classList.add('on'); }
+  if (n === 'list') { activeFilter = 'all'; renderList(); document.getElementById('nav-list').classList.add('on'); }
   if (n === 'today') { renderPills(); document.getElementById('nav-today').classList.add('on'); }
 }
 
@@ -1008,6 +1141,7 @@ function renderToday() {
   else { btn.textContent='I did this ✓'; btn.classList.remove('done'); btn.disabled=false; btn.style.opacity=''; }
   loadHeroPhoto(item);
   renderPills();
+  renderStreak();
 }
 
 function renderEmptyToday() {
@@ -1207,6 +1341,29 @@ async function markDoneFromDetail() {
   setTimeout(() => openModal(detailItemId, false), 700);
 }
 
+
+// ─── CATEGORY FILTER ─────────────────
+function renderFilterPills() {
+  const row = document.getElementById('filterRow');
+  if (!row) return;
+  // Build pill list: All + only cats that exist in pending items
+  const pendingCats = new Set(items.filter(i => !i.done).map(i => i.cat));
+  const doneCats = new Set(items.filter(i => i.done).map(i => i.cat));
+  const allCats = new Set([...pendingCats, ...doneCats]);
+  if (allCats.size <= 1) { row.style.display = 'none'; return; }
+  row.style.display = 'flex';
+  const pills = [{ id:'all', label:'All', emoji:'⊞' }, ...CATS.filter(c => allCats.has(c.id))];
+  row.innerHTML = pills.map(c => `
+    <div class="fchip ${activeFilter === c.id ? 'on' : ''}" onclick="setFilter('${c.id}')">
+      <span class="fchip-emoji">${c.emoji}</span>${c.label}
+    </div>`).join('');
+}
+
+function setFilter(f) {
+  activeFilter = f;
+  renderList();
+}
+
 // ─── MY LIST ─────────────────────────
 async function addItem() {
   const inp = document.getElementById('addInp');
@@ -1236,17 +1393,31 @@ function guessCat(title) {
 }
 
 function renderList() {
-  const pending = items.filter(i => !i.done);
-  const done = items.filter(i => i.done);
-  console.log("[LIST] renderList — pending:", pending.length, "done:", done.length);
-  document.getElementById('lCount').textContent = pending.length === 1 ? '1 to try' : `${pending.length} to try`;
-  document.getElementById('lEmpty').style.display = (pending.length===0 && done.length===0) ? 'block' : 'none';
+  const allPending = items.filter(i => !i.done);
+  const allDone    = items.filter(i => i.done);
+  const pending = activeFilter === 'all' ? allPending : allPending.filter(i => i.cat === activeFilter);
+  const done    = activeFilter === 'all' ? allDone    : allDone.filter(i => i.cat === activeFilter);
+  console.log("[LIST] renderList — pending:", pending.length, "done:", done.length, "filter:", activeFilter);
+
+  // Count always shows TOTAL (not filtered)
+  document.getElementById('lCount').textContent = allPending.length === 1 ? '1 to try' : `${allPending.length} to try`;
+
+  // "Your list is empty" only when truly empty (no items at all)
+  document.getElementById('lEmpty').style.display = (allPending.length === 0 && allDone.length === 0) ? 'block' : 'none';
+
+  // "Nothing in this filter" when filter yields zero but list isn't empty
+  const filterEmptyEl = document.getElementById('filterEmpty');
+  if (filterEmptyEl) filterEmptyEl.classList.toggle('show',
+    activeFilter !== 'all' && pending.length === 0 && done.length === 0);
+
   document.getElementById('lPending').innerHTML = pending.map(pendingHTML).join('');
   const journalEl = document.getElementById('journalSection');
   if (done.length > 0) {
     journalEl.style.display = 'block';
     document.getElementById('lDone').innerHTML = done.map(doneHTML).join('');
   } else { journalEl.style.display = 'none'; }
+
+  renderFilterPills();
 
   // Load images by title
   [...pending, ...done].forEach(item => {
@@ -1305,6 +1476,104 @@ function doneHTML(item) {
       </div>
     </div>
   </div>`;
+}
+
+
+// ─── AI SUGGEST PANEL (list screen) ──
+function openAiPanel() {
+  aiPanelSelected.clear();
+  aiPanelData = [];
+  document.getElementById('aipText').value = '';
+  document.getElementById('aipBtn').disabled = true;
+  document.getElementById('aipLoading').classList.remove('show');
+  document.getElementById('aipResults').classList.remove('show');
+  document.getElementById('aipFooter').classList.remove('show');
+  document.getElementById('aipCards').innerHTML = '';
+  document.getElementById('aiPanel').classList.add('on');
+  document.querySelector('.bnav').style.display = 'none';
+  setTimeout(() => document.getElementById('aipText').focus(), 300);
+}
+
+function closeAiPanel() {
+  document.getElementById('aiPanel').classList.remove('on');
+  document.querySelector('.bnav').style.display = '';
+}
+
+function aipCheck() {
+  const v = document.getElementById('aipText').value.trim();
+  document.getElementById('aipBtn').disabled = v.length < 10;
+}
+
+async function runAiSuggest() {
+  const text = document.getElementById('aipText').value.trim();
+  if (text.length < 10) return;
+  const btn = document.getElementById('aipBtn');
+  btn.disabled = true;
+  btn.textContent = 'Finding ideas…';
+
+  aiPanelSelected.clear();
+  aiPanelData = [];
+  document.getElementById('aipResults').classList.remove('show');
+  document.getElementById('aipFooter').classList.remove('show');
+  document.getElementById('aipLoading').classList.add('show');
+
+  try {
+    aiPanelData = await fetchClaudeSuggestions(text);
+  } catch(e) {
+    console.error('[AI PANEL] fetch failed:', e);
+    aiPanelData = DEFAULT_SUGGESTIONS;
+  }
+
+  document.getElementById('aipLoading').classList.remove('show');
+  document.getElementById('aipCards').innerHTML = aiPanelData.map((s, i) => `
+    <div class="sug-card" id="aip-${i}" onclick="toggleAipSug(${i})">
+      <div class="sug-check"><span class="sug-check-tick">✓</span></div>
+      <div class="sug-body">
+        <div class="sug-title">${s.title}</div>
+        <div class="sug-why">${s.why}</div>
+      </div>
+    </div>`).join('');
+  document.getElementById('aipResults').classList.add('show');
+  document.getElementById('aipFooter').classList.add('show');
+  btn.textContent = '✦ Generate new ideas';
+  btn.disabled = false;
+}
+
+function toggleAipSug(i) {
+  if (aiPanelSelected.has(i)) { aiPanelSelected.delete(i); document.getElementById(`aip-${i}`).classList.remove('selected'); }
+  else { aiPanelSelected.add(i); document.getElementById(`aip-${i}`).classList.add('selected'); }
+  const count = aiPanelSelected.size;
+  document.getElementById('aipAddBtn').classList.toggle('ready', count > 0);
+  document.getElementById('aipFooterHint').textContent = count === 0
+    ? 'Select at least one'
+    : count === 1 ? '1 selected — add more or continue'
+    : `${count} selected`;
+}
+
+async function addAiSelected() {
+  if (aiPanelSelected.size === 0) return;
+  if (!user) return;
+  const btn = document.getElementById('aipAddBtn');
+  btn.textContent = 'Adding…';
+  btn.disabled = true;
+  const toAdd = [...aiPanelSelected].map(i => aiPanelData[i]);
+  let added = 0;
+  for (const s of toAdd) {
+    try {
+      const saved = await dbInsert({ title: s.title, cat: s.cat || 'nature', done: false, is_challenge: false });
+      if (saved) {
+        items.unshift(saved);
+        added++;
+        getPhotoForTitle(s.title);
+      }
+    } catch(e) { console.error('[AI PANEL] insert failed:', s.title, e); }
+  }
+  closeAiPanel();
+  activeFilter = 'all';
+  renderList();
+  renderPills();
+  if (!cItemId || items.filter(i => !i.done).length === added) initToday();
+  showToast(`${added} idea${added === 1 ? '' : 's'} added ✦`);
 }
 
 // ─── CELEBRATION ─────────────────────
