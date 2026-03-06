@@ -88,7 +88,7 @@ body { max-width: 430px; margin: 0 auto; }
 .op-back { font-size:11px; color:var(--ink3); cursor:pointer; margin-bottom:14px; display:inline-flex; align-items:center; gap:5px; }
 .op-title { font-family:'Lora',serif; font-style:italic; font-size:22px; color:var(--ink); margin-bottom:5px; line-height:1.3; }
 .op-sub { font-size:12px; color:var(--ink3); font-weight:300; line-height:1.5; }
-.op-loading { flex:1; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:16px; padding:40px; }
+.op-loading { flex:1; }
 .op-dot { width:8px; height:8px; border-radius:50%; background:var(--ink4); animation:dotPulse 1.4s ease infinite; }
 .op-dot:nth-child(2) { animation-delay:.2s; }
 .op-dot:nth-child(3) { animation-delay:.4s; }
@@ -284,9 +284,7 @@ body { max-width: 430px; margin: 0 auto; }
 .confetti-piece { position:absolute; width:8px; height:8px; border-radius:2px; }
 
 /* ─── EMPTY ─── */
-.lempty { text-align:center; padding:60px 20px; color:var(--ink3); }
-.lempty .ei { font-size:40px; margin-bottom:14px; }
-.lempty p { font-size:14px; line-height:1.6; font-weight:300; font-style:italic; font-family:'Lora',serif; }
+
 
 /* ─── REFLECTION MODAL ─── */
 .modal-bg { position:fixed; inset:0; background:rgba(28,28,26,0); z-index:500; display:flex; align-items:flex-end; justify-content:center; pointer-events:none; transition:background .3s ease; }
@@ -383,9 +381,7 @@ body { max-width: 430px; margin: 0 auto; }
 .dhead-sub { font-size:12px; color:var(--ink3); font-weight:300; margin-bottom:0; }
 .dscroll { flex:1; overflow-y:auto; padding:16px 20px 24px; -webkit-overflow-scrolling:touch; }
 .dscroll::-webkit-scrollbar { display:none; }
-.dempty { text-align:center; padding:60px 20px; color:var(--ink3); }
-.dempty .ei { font-size:40px; margin-bottom:14px; }
-.dempty p { font-size:14px; line-height:1.6; font-weight:300; font-style:italic; font-family:'Lora',serif; }
+
 
 /* ─── SURFACING LOADER (shared by onboarding + AI panel) ─── */
 .surf-loader { flex:1; position:relative; overflow:hidden; display:flex; align-items:flex-end; justify-content:center; padding-bottom:40px; }
@@ -408,6 +404,17 @@ body { max-width: 430px; margin: 0 auto; }
 .surf-loader.dark .surf-label { color:rgba(255,255,255,.85); }
 .surf-loader.dark .surf-bar-wrap { background:rgba(255,255,255,.12); }
 .surf-loader.dark .surf-bar { background:var(--gold); }
+
+/* ─── RICH EMPTY STATES ─── */
+.empty-state { display:none; text-align:center; padding:48px 28px 32px; }
+.empty-state.show { display:block; }
+.empty-icon { font-size:44px; margin-bottom:16px; line-height:1; }
+.empty-title { font-family:'Lora',serif; font-style:italic; font-size:20px; color:var(--ink); margin-bottom:8px; line-height:1.35; }
+.empty-sub { font-size:13px; color:var(--ink3); font-weight:300; line-height:1.6; margin-bottom:28px; }
+.empty-cta-primary { display:flex; align-items:center; justify-content:center; gap:8px; width:100%; background:var(--ink); color:var(--bg); border:none; border-radius:14px; padding:15px; font-family:'DM Sans',sans-serif; font-size:14px; font-weight:500; cursor:pointer; transition:all .18s; margin-bottom:10px; touch-action:manipulation; }
+.empty-cta-primary:active { transform:scale(.97); }
+.empty-cta-secondary { display:flex; align-items:center; justify-content:center; gap:8px; width:100%; background:none; color:var(--ink2); border:1.5px solid var(--ink4); border-radius:14px; padding:14px; font-family:'DM Sans',sans-serif; font-size:14px; cursor:pointer; transition:all .18s; touch-action:manipulation; }
+.empty-cta-secondary:active { background:var(--ink4); }
 </style>
 </head>
 <body>
@@ -471,7 +478,7 @@ body { max-width: 430px; margin: 0 auto; }
     <div class="op-title" id="opTitle">Finding things for you…</div>
     <div class="op-sub" id="opSub">One moment.</div>
   </div>
-  <div class="op-loading surf-loader dark" id="opLoading">
+  <div class="op-loading surf-loader" id="opLoading">
     <div class="surf-words-stage" id="opWordStage"></div>
     <div class="surf-bottom">
       <div class="surf-label" id="opLoadLabel">Reading what you wrote…</div>
@@ -539,7 +546,17 @@ body { max-width: 430px; margin: 0 auto; }
     <div class="filter-row" id="filterRow"></div>
     <div class="lscroll" id="lScroll">
       <div class="filter-empty" id="filterEmpty">No items in this category.</div>
-      <div class="lempty" id="lEmpty"><div class="ei">🗺️</div><p>Your list is empty.<br>Add the first thing you want to try.</p></div>
+      <div class="empty-state" id="lEmpty">
+        <div class="empty-icon">🗺️</div>
+        <div class="empty-title">Your list is waiting</div>
+        <div class="empty-sub">Add things you've always wanted to try — or let AI find ideas that fit you.</div>
+        <button class="empty-cta-primary" onclick="openAiPanel()">
+          <span>✦</span> Find ideas with AI
+        </button>
+        <button class="empty-cta-secondary" onclick="document.getElementById('addInp').focus()">
+          ✎ Add something yourself
+        </button>
+      </div>
       <div id="lPending"></div>
 
     </div>
@@ -636,7 +653,14 @@ body { max-width: 430px; margin: 0 auto; }
       <div class="dhead-sub">Everything you've experienced so far.</div>
     </div>
     <div class="dscroll" id="dScroll">
-      <div class="dempty" id="dEmpty"><div class="ei">🏆</div><p>Nothing completed yet.<br>Mark something done to see it here.</p></div>
+      <div class="empty-state" id="dEmpty">
+        <div class="empty-icon">🏆</div>
+        <div class="empty-title">Nothing here yet</div>
+        <div class="empty-sub">Complete something from your list and it'll live here — with your notes, rating, and the date you did it.</div>
+        <button class="empty-cta-primary" onclick="showPage('list')">
+          → Go to My List
+        </button>
+      </div>
       <div id="dDoneList"></div>
     </div>
   </div>
@@ -1015,7 +1039,7 @@ async function goToSuggestions() {
   document.getElementById('opScroll').classList.remove('show');
   document.getElementById('opFooter').classList.remove('show');
   document.getElementById('opLoading').style.display = 'flex';
-  surfStart('opWordStage', true);
+  surfStart('opWordStage', false);
   document.getElementById('opTitle').textContent = 'Finding things for you…';
   document.getElementById('opSub').textContent = 'One moment.';
 
@@ -1513,7 +1537,7 @@ function renderList() {
   document.getElementById('lCount').textContent = allPending.length === 1 ? '1 to try' : `${allPending.length} to try`;
 
   // "Your list is empty" only when truly empty (no pending items at all)
-  document.getElementById('lEmpty').style.display = allPending.length === 0 ? 'block' : 'none';
+  document.getElementById('lEmpty').classList.toggle('show', allPending.length === 0);
 
   // "Nothing in this filter" when filter yields zero but list isn't empty
   const filterEmptyEl = document.getElementById('filterEmpty');
@@ -1549,7 +1573,7 @@ function renderDone() {
   const done = items.filter(i => i.done);
   console.log("[DONE] renderDone — done:", done.length);
   document.getElementById('dCount').textContent = done.length === 1 ? '1 completed' : `${done.length} completed`;
-  document.getElementById('dEmpty').style.display = done.length === 0 ? 'block' : 'none';
+  document.getElementById('dEmpty').classList.toggle('show', done.length === 0);
   document.getElementById('dDoneList').innerHTML = done.map(doneHTML).join('');
 
   // Load images
