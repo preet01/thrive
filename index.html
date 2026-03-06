@@ -89,7 +89,6 @@ body { max-width: 430px; margin: 0 auto; }
 .op-title { font-family:'Lora',serif; font-style:italic; font-size:22px; color:var(--ink); margin-bottom:5px; line-height:1.3; }
 .op-sub { font-size:12px; color:var(--ink3); font-weight:300; line-height:1.5; }
 .op-loading { flex:1; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:16px; padding:40px; }
-.op-loading-dots { display:flex; gap:8px; }
 .op-dot { width:8px; height:8px; border-radius:50%; background:var(--ink4); animation:dotPulse 1.4s ease infinite; }
 .op-dot:nth-child(2) { animation-delay:.2s; }
 .op-dot:nth-child(3) { animation-delay:.4s; }
@@ -121,12 +120,13 @@ body { max-width: 430px; margin: 0 auto; }
 .op-go-btn:active { transform:scale(.97); }
 
 /* ─── APP SHELL ─── */
-.app { display:flex; flex-direction:column; height:100vh; height:100dvh; overflow:hidden; position:relative; }
-.page { position:absolute; inset:0 0 calc(56px + env(safe-area-inset-bottom)) 0; display:flex; flex-direction:column; opacity:0; pointer-events:none; transform:translateY(10px); transition:opacity .26s ease,transform .26s ease; overflow:hidden; }
+.app { display:flex; flex-direction:column; height:100vh; height:100dvh; overflow:hidden; }
+.pages-wrap { flex:1; position:relative; overflow:hidden; }
+.page { position:absolute; inset:0; display:flex; flex-direction:column; opacity:0; pointer-events:none; transform:translateY(10px); transition:opacity .26s ease,transform .26s ease; overflow:hidden; }
 .page.on { opacity:1; pointer-events:all; transform:translateY(0); }
 
 /* ─── NAV ─── */
-.bnav { position:fixed; bottom:0; left:50%; transform:translateX(-50%); width:100%; max-width:430px; background:rgba(247,245,240,.96); backdrop-filter:blur(18px); border-top:1px solid var(--ink4); display:flex; padding:10px 0 max(16px,env(safe-area-inset-bottom)); z-index:300; touch-action:manipulation; }
+.bnav { flex-shrink:0; width:100%; background:rgba(247,245,240,.96); backdrop-filter:blur(18px); border-top:1px solid var(--ink4); display:flex; padding:10px 0 max(16px,env(safe-area-inset-bottom)); touch-action:manipulation; }
 .nb { flex:1; display:flex; flex-direction:column; align-items:center; gap:4px; background:none; border:none; cursor:pointer; padding:4px 0; transition:all .2s; touch-action:manipulation; -webkit-tap-highlight-color:transparent; }
 .nb .ni { font-size:20px; line-height:1; transition:transform .2s; }
 .nb .nl { font-size:9px; letter-spacing:1px; text-transform:uppercase; color:var(--ink4); font-weight:500; transition:color .2s; }
@@ -232,7 +232,7 @@ body { max-width: 430px; margin: 0 auto; }
 .citem-edit-btn { display:inline-flex; align-items:center; gap:5px; font-size:11px; color:var(--gold); font-weight:500; background:var(--gold-l); border:1px solid rgba(200,149,42,.2); border-radius:20px; padding:5px 12px; cursor:pointer; font-family:'DM Sans',sans-serif; transition:all .18s; margin-top:6px; }
 
 /* ─── ITEM DETAIL SCREEN ─── */
-#page-detail { background:var(--bg); z-index:150; bottom:0 !important; }
+#page-detail { background:var(--bg); z-index:150; }
 .detail-hero { position:relative; height:46vh; flex-shrink:0; overflow:hidden; }
 .detail-hero-photo { position:absolute; inset:0; width:100%; height:100%; object-fit:cover; transition:opacity .8s ease; }
 .detail-hero-photo.dim { opacity:0; }
@@ -358,7 +358,6 @@ body { max-width: 430px; margin: 0 auto; }
 .aip-btn-manual { background:var(--bg); color:var(--ink2); border:1.5px solid var(--ink4); border-radius:12px; padding:12px 16px; font-family:'DM Sans',sans-serif; font-size:13px; cursor:pointer; transition:all .18s; touch-action:manipulation; }
 .aip-loading { flex:1; display:none; flex-direction:column; align-items:center; justify-content:center; gap:14px; }
 .aip-loading.show { display:flex; }
-.aip-loading-dots { display:flex; gap:8px; }
 .aip-results { flex:1; overflow-y:auto; padding:14px 20px 24px; display:none; -webkit-overflow-scrolling:touch; }
 .aip-results.show { display:block; }
 .aip-results::-webkit-scrollbar { display:none; }
@@ -387,6 +386,28 @@ body { max-width: 430px; margin: 0 auto; }
 .dempty { text-align:center; padding:60px 20px; color:var(--ink3); }
 .dempty .ei { font-size:40px; margin-bottom:14px; }
 .dempty p { font-size:14px; line-height:1.6; font-weight:300; font-style:italic; font-family:'Lora',serif; }
+
+/* ─── SURFACING LOADER (shared by onboarding + AI panel) ─── */
+.surf-loader { flex:1; position:relative; overflow:hidden; display:flex; align-items:flex-end; justify-content:center; padding-bottom:40px; }
+.surf-loader.hidden { display:none; }
+.surf-words-stage { position:absolute; inset:0; pointer-events:none; }
+.surf-word { position:absolute; font-family:'Lora',serif; font-style:italic; font-weight:400; white-space:nowrap; opacity:0; animation:surfWordRise linear forwards; }
+@keyframes surfWordRise {
+  0%   { opacity:0;   transform:translateY(0px); }
+  12%  { opacity:1; }
+  75%  { opacity:.65; }
+  100% { opacity:0;   transform:translateY(-110px); }
+}
+.surf-bottom { position:relative; z-index:2; text-align:center; }
+.surf-label { font-family:'Lora',serif; font-style:italic; font-size:16px; color:var(--ink); margin-bottom:10px; animation:surfLabelPulse 2.6s ease-in-out infinite; }
+@keyframes surfLabelPulse { 0%,100%{opacity:.55} 50%{opacity:1} }
+.surf-bar-wrap { width:100px; height:2px; background:var(--ink4); border-radius:2px; margin:0 auto; overflow:hidden; }
+.surf-bar { height:100%; background:var(--accent); border-radius:2px; animation:surfBar 2s ease-in-out infinite; }
+@keyframes surfBar { 0%{width:0%;margin-left:0} 50%{width:60%} 100%{width:0%;margin-left:100%} }
+/* Dark variant (onboarding screen is dark) */
+.surf-loader.dark .surf-label { color:rgba(255,255,255,.85); }
+.surf-loader.dark .surf-bar-wrap { background:rgba(255,255,255,.12); }
+.surf-loader.dark .surf-bar { background:var(--gold); }
 </style>
 </head>
 <body>
@@ -450,9 +471,12 @@ body { max-width: 430px; margin: 0 auto; }
     <div class="op-title" id="opTitle">Finding things for you…</div>
     <div class="op-sub" id="opSub">One moment.</div>
   </div>
-  <div class="op-loading" id="opLoading">
-    <div class="op-loading-dots"><div class="op-dot"></div><div class="op-dot"></div><div class="op-dot"></div></div>
-    <div class="op-loading-text">Reading what you wrote<br>and finding things that fit…</div>
+  <div class="op-loading surf-loader dark" id="opLoading">
+    <div class="surf-words-stage" id="opWordStage"></div>
+    <div class="surf-bottom">
+      <div class="surf-label" id="opLoadLabel">Reading what you wrote…</div>
+      <div class="surf-bar-wrap"><div class="surf-bar"></div></div>
+    </div>
   </div>
   <div class="op-scroll" id="opScroll">
     <div class="op-select-hint">Tap everything that feels right.</div>
@@ -466,6 +490,8 @@ body { max-width: 430px; margin: 0 auto; }
 
 <!-- APP -->
 <div class="app">
+
+<div class="pages-wrap">
 
   <!-- TODAY -->
   <div class="page on" id="page-today">
@@ -585,9 +611,12 @@ body { max-width: 430px; margin: 0 auto; }
       <button class="aip-btn-manual" onclick="closeAiPanel()">Just add manually</button>
     </div>
   </div>
-  <div class="aip-loading" id="aipLoading">
-    <div class="aip-loading-dots"><div class="op-dot"></div><div class="op-dot"></div><div class="op-dot"></div></div>
-    <div class="op-loading-text">Finding ideas for you…</div>
+  <div class="aip-loading surf-loader" id="aipLoading">
+    <div class="surf-words-stage" id="aipWordStage"></div>
+    <div class="surf-bottom">
+      <div class="surf-label">Finding ideas for you…</div>
+      <div class="surf-bar-wrap"><div class="surf-bar"></div></div>
+    </div>
   </div>
   <div class="aip-results" id="aipResults">
     <div class="aip-results-hint">Tap everything you want to add</div>
@@ -612,7 +641,7 @@ body { max-width: 430px; margin: 0 auto; }
     </div>
   </div>
 
-</div>
+</div><!-- /pages-wrap -->
 
 <!-- NAV -->
 <nav class="bnav">
@@ -626,6 +655,7 @@ body { max-width: 430px; margin: 0 auto; }
     <span class="ni">✓</span><span class="nl">Done</span>
   </button>
 </nav>
+</div><!-- /app -->
 
 <!-- REFLECTION MODAL -->
 <div class="modal-bg" id="modalBg" onclick="bgClick(event)">
@@ -908,6 +938,49 @@ const DEFAULT_SUGGESTIONS = [
   { title: 'Make something — anything — with your hands today', why: 'Creation is the antidote to feeling passive.', cat: 'arts' },
 ];
 
+
+// ─── SURFACING LOADER ANIMATION ──────
+const SURF_WORDS = ['adventure','connection','discovery','growth','curiosity',
+  'experience','joy','wonder','belonging','courage','creativity','presence',
+  'stillness','momentum','purpose','freedom','delight','openness','exploration',
+  'aliveness','spark','meaning','play','rest','depth','surprise'];
+const SURF_COLORS_DARK  = ['rgba(255,255,255,.7)','rgba(200,149,42,.8)','rgba(255,255,255,.45)','rgba(200,149,42,.55)','rgba(255,255,255,.55)'];
+const SURF_COLORS_LIGHT = ['#2d6a4f','#c8952a','#5a5a54','#7a9e8a','#a8886a','#1c1c1a'];
+let surfTimers = {};
+
+function surfSpawnWord(stageId, dark) {
+  const stage = document.getElementById(stageId);
+  if (!stage) return;
+  const w = document.createElement('div');
+  w.className = 'surf-word';
+  const word = SURF_WORDS[Math.floor(Math.random() * SURF_WORDS.length)];
+  const size = 12 + Math.floor(Math.random() * 15);
+  const colors = dark ? SURF_COLORS_DARK : SURF_COLORS_LIGHT;
+  w.textContent = word;
+  w.style.fontSize = size + 'px';
+  w.style.color = colors[Math.floor(Math.random() * colors.length)];
+  w.style.left = (5 + Math.random() * 78) + '%';
+  w.style.bottom = (8 + Math.random() * 55) + '%';
+  const dur = 3.2 + Math.random() * 2.2;
+  w.style.animationDuration = dur + 's';
+  stage.appendChild(w);
+  setTimeout(() => w.remove(), dur * 1000 + 200);
+}
+
+function surfStart(stageId, dark) {
+  surfStop(stageId);
+  const isDark = !!dark;
+  // Seed with a burst then keep interval
+  for (let i = 0; i < 5; i++) setTimeout(() => surfSpawnWord(stageId, isDark), i * 180);
+  surfTimers[stageId] = setInterval(() => surfSpawnWord(stageId, isDark), 380);
+}
+
+function surfStop(stageId) {
+  if (surfTimers[stageId]) { clearInterval(surfTimers[stageId]); delete surfTimers[stageId]; }
+  const stage = document.getElementById(stageId);
+  if (stage) stage.innerHTML = '';
+}
+
 // ─── ONBOARDING ──────────────────────
 function startOnboarding() {
   getPhotoForTitle('nature landscape adventure morning').then(url => {
@@ -942,6 +1015,7 @@ async function goToSuggestions() {
   document.getElementById('opScroll').classList.remove('show');
   document.getElementById('opFooter').classList.remove('show');
   document.getElementById('opLoading').style.display = 'flex';
+  surfStart('opWordStage', true);
   document.getElementById('opTitle').textContent = 'Finding things for you…';
   document.getElementById('opSub').textContent = 'One moment.';
 
@@ -956,6 +1030,7 @@ async function goToSuggestions() {
   }
 
   document.getElementById('opLoading').style.display = 'none';
+  surfStop('opWordStage');
   document.getElementById('opTitle').textContent = 'Here\'s what feels right for you';
   document.getElementById('opSub').textContent = 'Tap everything that resonates.';
   document.getElementById('opScroll').classList.add('show');
@@ -1574,6 +1649,7 @@ async function runAiSuggest() {
   document.getElementById('aipResults').classList.remove('show');
   document.getElementById('aipFooter').classList.remove('show');
   document.getElementById('aipLoading').classList.add('show');
+  surfStart('aipWordStage', false);
 
   try {
     aiPanelData = await fetchClaudeSuggestions(text);
@@ -1583,6 +1659,7 @@ async function runAiSuggest() {
   }
 
   document.getElementById('aipLoading').classList.remove('show');
+  surfStop('aipWordStage');
   document.getElementById('aipCards').innerHTML = aiPanelData.map((s, i) => `
     <div class="sug-card" id="aip-${i}" onclick="toggleAipSug(${i})">
       <div class="sug-check"><span class="sug-check-tick">✓</span></div>
